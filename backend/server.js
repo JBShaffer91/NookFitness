@@ -1,10 +1,9 @@
-
 require('dotenv').config();
 const axios = require('axios');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const mysql = require('mysql');
+const { MongoClient } = require('mongodb');
 const userRoutes = require('./routes/userRoutes');
 const foodRoutes = require('./routes/foodRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
@@ -20,31 +19,26 @@ const EXERCISE_API3_KEY = process.env.EXERCISE_API3_KEY;
 // Middleware setup
 app.use(bodyParser.json());
 app.use(cors());
-app.use(foodRoutes);
-app.use('/api/workouts', workoutRoutes);
-app.use(progressRoutes);
 
-// MySQL Connection setup
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  database: 'nook_fitness'
-});
+// MongoDB Connection setup
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/NookFitDB';
+const client = new MongoClient(MONGO_URI, { useUnifiedTopology: true });
 
-connection.connect(err => {
+client.connect(err => {
   if (err) throw err;
-  console.log('Connected to MySQL database.');
+  console.log('Connected to MongoDB database.');
+  app.locals.db = client.db('NookFitDB');
 });
-
-// Exporting the connection for other modules to use
-module.exports = connection;
 
 // Routes
+app.use(foodRoutes);
+app.use('/api/workouts', workoutRoutes);
+app.use('/api/users', userRoutes);
+app.use(progressRoutes);
+
 app.get('/', (req, res) => {
   res.send('Nook Fitness API is running!');
 });
-
-app.use('/api/users', userRoutes);
 
 // Suggestic API Route to get a meal plan
 app.get('/api/suggestic/mealplan', async (req, res) => {

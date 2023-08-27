@@ -1,55 +1,69 @@
 const express = require('express');
 const router = express.Router();
-const connection = require('../server'); // Assuming you've exported the MySQL connection from server.js
 
-router.post('/api/food', (req, res) => {
+router.post('/api/food', async (req, res) => {
+  const db = req.app.locals.db;
+  const foodDiaryCollection = db.collection('food_diary');
   const { user_id, food_name, calories, protein, carbs, fats } = req.body;
-  connection.query('INSERT INTO food_diary (user_id, food_name, calories, protein, carbs, fats, entry_date, entry_time) VALUES (?, ?, ?, ?, ?, ?, CURDATE(), CURTIME())', [user_id, food_name, calories, protein, carbs, fats], (err, results) => {
-      if (err) {
-          return res.status(500).send('Database error.');
-      }
-      res.status(201).send('Food entry added successfully!');
-  });
+
+  const entry = {
+    user_id,
+    food_name,
+    calories,
+    protein,
+    carbs,
+    fats,
+    entry_date: new Date(),
+    entry_time: new Date().toLocaleTimeString()
+  };
+
+  await foodDiaryCollection.insertOne(entry);
+  res.status(201).send('Food entry added successfully!');
 });
 
-router.get('/api/food/:user_id/:date', (req, res) => {
+router.get('/api/food/:user_id/:date', async (req, res) => {
+  const db = req.app.locals.db;
+  const foodDiaryCollection = db.collection('food_diary');
   const { user_id, date } = req.params;
-  connection.query('SELECT * FROM food_diary WHERE user_id = ? AND entry_date = ?', [user_id, date], (err, results) => {
-      if (err) {
-          return res.status(500).send('Database error.');
-      }
-      res.status(200).json(results);
-  });
+
+  const entries = await foodDiaryCollection.find({ user_id, entry_date: new Date(date) }).toArray();
+  res.status(200).json(entries);
 });
 
-router.post('/api/if/schedule', (req, res) => {
+router.post('/api/if/schedule', async (req, res) => {
+  const db = req.app.locals.db;
+  const ifCollection = db.collection('intermittent_fasting');
   const { user_id, start_time, end_time } = req.body;
-  connection.query('INSERT INTO intermittent_fasting (user_id, start_time, end_time) VALUES (?, ?, ?)', [user_id, start_time, end_time], (err, results) => {
-      if (err) {
-          return res.status(500).send('Database error.');
-      }
-      res.status(201).send('IF schedule set successfully!');
-  });
+
+  await ifCollection.insertOne({ user_id, start_time, end_time, is_active: true });
+  res.status(201).send('IF schedule set successfully!');
 });
 
-router.put('/api/if/toggle/:user_id', (req, res) => {
+router.put('/api/if/toggle/:user_id', async (req, res) => {
+  const db = req.app.locals.db;
+  const ifCollection = db.collection('intermittent_fasting');
   const { user_id } = req.params;
-  connection.query('UPDATE intermittent_fasting SET is_active = NOT is_active WHERE user_id = ?', [user_id], (err, results) => {
-      if (err) {
-          return res.status(500).send('Database error.');
-      }
-      res.status(200).send('IF status toggled successfully!');
-  });
+
+  const userIF = await ifCollection.findOne({ user_id });
+  if (!userIF) {
+    return res.status(404).send('User IF schedule not found.');
+  }
+
+  await ifCollection.updateOne({ user_id }, { $set: { is_active: !userIF.is_active } });
+  res.status(200).send('IF status toggled successfully!');
 });
 
-router.get('/api/if/schedule/:user_id', (req, res) => {
+router.get('/api/if/schedule/:user_id', async (req, res) => {
+  const db = req.app.locals.db;
+  const ifCollection = db.collection('intermittent_fasting');
   const { user_id } = req.params;
-  connection.query('SELECT * FROM intermittent_fasting WHERE user_id = ?', [user_id], (err, results) => {
-      if (err) {
-          return res.status(500).send('Database error.');
-      }
-      res.status(200).json(results);
-  });
+
+  const schedule = await ifCollection.findOne({ user_id });
+  if (!schedule) {
+    return res.status(404).send('User IF schedule not found.');
+  }
+
+  res.status(200).json(schedule);
 });
 
 module.exports = router;

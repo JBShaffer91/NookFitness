@@ -2,22 +2,25 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const connection = require('../server');
 
 // User Registration
 router.post('/register', async (req, res) => {
+  const db = req.app.locals.db;
+  const usersCollection = db.collection('users');
   const { username, email, password } = req.body;
+
+  // Check if user already exists
+  const existingUser = await usersCollection.findOne({ email });
+  if (existingUser) {
+    return res.status(400).send('User already exists.');
+  }
 
   // Hash the password
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // Store the user in the database 
-  connection.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword], (err, results) => {
-    if (err) {
-        return res.status(500).send('Database error.');
-    }
-    res.status(201).send('User registered successfully!');
-  });
+  await usersCollection.insertOne({ username, email, password: hashedPassword });
+  res.status(201).send('User registered successfully!');
 });
 
 // User Login
