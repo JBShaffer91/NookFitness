@@ -3,7 +3,7 @@ const router = express.Router();
 const ObjectId = require('mongodb').ObjectId;
 
 // Add Progress Entry
-router.post('/api/users/:userId/progress', async (req, res) => {
+router.post('/', async (req, res) => {
     const db = req.app.locals.db;
     const progressCollection = db.collection('user_progress');
     const { userId } = req.params;
@@ -24,7 +24,7 @@ router.post('/api/users/:userId/progress', async (req, res) => {
 });
 
 // Get Progress Entries
-router.get('/api/users/:userId/progress', async (req, res) => {
+router.get('/:userId', async (req, res) => {
     const db = req.app.locals.db;
     const progressCollection = db.collection('user_progress');
     const { userId } = req.params;
@@ -34,7 +34,7 @@ router.get('/api/users/:userId/progress', async (req, res) => {
 });
 
 // Update Progress Entry
-router.put('/api/users/:userId/progress/:progressId', async (req, res) => {
+router.put('/:userId/:progressId', async (req, res) => {
     const db = req.app.locals.db;
     const progressCollection = db.collection('user_progress');
     const { userId, progressId } = req.params;
@@ -54,7 +54,7 @@ router.put('/api/users/:userId/progress/:progressId', async (req, res) => {
 });
 
 // Delete Progress Entry
-router.delete('/api/users/:userId/progress/:progressId', async (req, res) => {
+router.delete('/:userId/:progressId', async (req, res) => {
     const db = req.app.locals.db;
     const progressCollection = db.collection('user_progress');
     const { userId, progressId } = req.params;

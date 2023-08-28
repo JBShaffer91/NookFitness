@@ -34,7 +34,7 @@ client.connect(err => {
 app.use('/api/food', foodRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/users', userRoutes);
-app.use(progressRoutes);
+app.use('/api/users/:userId/progress', progressRoutes);
 
 app.get('/', (req, res) => {
   res.send('Nook Fitness API is running!');
