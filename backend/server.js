@@ -31,7 +31,7 @@ client.connect(err => {
 });
 
 // Routes
-app.use(foodRoutes);
+app.use('/api/food', foodRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/users', userRoutes);
 app.use(progressRoutes);
