@@ -96,3 +96,12 @@ For a more comprehensive overview of the project, view this Google Doc that cont
 - **Hours:** 1
 - **Activity:** Reviewed the Overview and Task List to ensure all features have a clear path to implementation. Finialized a Monetization Strategy to prepare for the project's launch.
 - **Resource:** [Nook Fitness - Overview & Task List](https://docs.google.com/document/d/1Bd4uZPJtuBchkrqtRt7HykZQKXfil8IJJttziWIDpDQ/edit?usp=sharing)
+
+### Date: 08/27-28/2023
+- **Hours:** 12
+- **Activity:** Switched database from MySQL to MongoDB. Downloaded and installed MongoDB and MongoDB Compass. Addressed issue with PATH in System Variables, created `NookFitDB` database, and created `users`, `food_diary`, `workout_sessions`, and `user_progress` collections in the database. Refactored routes files and server file to switch from MySQL to MongoDB.
+
+Downloaded and installed Java JDK 11.0.20 to address compatability issue with Android Studio and the Pixel 3 emulator.
+**Resources:**
+- [MongoDB Community Server](https://www.mongodb.com/try/download/community)
+- [Java Downloads](https://www.oracle.com/java/technologies/downloads/#java11)
