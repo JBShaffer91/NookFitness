@@ -13,32 +13,30 @@ For a more comprehensive overview of the project, view this Google Doc that cont
 
 - **Platform:** Mobile app developed using React Native.
 - **State Management:** Redux.
-- **Backend:** Express.js with MySQL for database management.
+- **Backend:** Express.js with MongoDB for database management.
 - **APIs:** 
   - Suggestic API for personalized meal planning and nutrition tracking.
   - ExerciseAPI3 for accessing a comprehensive workout database.
 
 ## MVP Goals
 
-1. **28-Day Workout Calendar:** Pre-set workouts for each day with progress tracking.
+1. **28-Day Workout Calendar:** Pre-set workouts for each day with progress tracking. Users will be able to edit their workout plans and add/remove exercises.
 2. **Personalized Diet Plans:** User stats-based meal plans with caloric and macronutrient targets.
 3. **Workout Database:** Access to over 500 exercises with detailed information.
 4. **Food Diary & Nutrition Tracker:** Daily food intake logging with nutritional insights.
-5. **Progress Tracking:** Monitors completed workouts and adherence to meal plans.
-6. **User Experience & Motivation:** Celebratory and motivational messages to keep users engaged.
+5. **Intermittent Fasting Component:** An optional feature where the app guides users on when to eat and how many calories of which macronutrients they need to consume. This feature can be toggled on/off based on user preference.
+6. **Advanced Customizable Calendar:** Allow users who have completed all 3 tiers of the 28 Day Program to create and customize their next 28-day workout and diet plans according to their preferences and goals.
 
 ## Stretch Goals
 
-1. **Intermittent Fasting Component:** An optional feature where the app guides users on when to eat and how many calories of which macronutrients they need to consume. This feature can be toggled on/off based on user preference.
-2. **Social Integration:** Allow users to connect with friends, share their progress, and engage in friendly competitions.
-3. **Gamification:** Introduce points, badges, and rewards to motivate users to stick to their fitness and diet plans.
-4. **Virtual Personal Trainer:** Implement AI-driven virtual training sessions with real-time feedback on user's exercise form and technique.
-5. **Augmented Reality (AR) Workouts:** Provide AR-guided workouts where users can see exercise demonstrations in their environment.
+1. **Progress Tracking:** Monitors completed workouts and adherence to meal plans.
+2. **User Experience & Motivation:** Celebratory and motivational messages to keep users engaged.
+3. **Social Integration:** Allow users to connect with friends, share their progress, and engage in friendly competitions.
+4. **Gamification:** Introduce points, badges, and rewards to motivate users to stick to their fitness and diet plans.
+5. **Virtual Personal Trainer:** Implement AI-driven virtual training sessions with real-time feedback on user's exercise form and technique.
 6. **Integration with Wearables:** Sync with fitness wearables like Fitbit or Apple Watch to track user's heart rate, steps, and other vital stats in real-time.
-7. **Voice Assistant Integration:** Allow users to interact with the app using voice commands, making it easier to log meals, start workouts, or check progress.
-8. **Advanced Analytics:** Provide users with deep insights into their fitness journey, highlighting patterns, predicting plateaus, and suggesting optimizations.
-9. **Community Forums:** Create a platform within the app where users can share their experiences, ask questions, and offer support to one another.
-10. **Customizable Workout Plans:** Allow more experienced users to modify and customize their 28-day workout plans according to their preferences and goals.
+7. **Advanced Analytics:** Provide users with deep insights into their fitness journey, highlighting patterns, predicting plateaus, and suggesting optimizations.
+8. **Community Forums:** Create a platform within the app where users can share their experiences, ask questions, and offer support to one another.
 
 ## Research & Development Log
 
