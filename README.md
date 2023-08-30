@@ -103,3 +103,9 @@ Downloaded and installed Java JDK 11.0.20 to address compatability issue with An
 **Resources:**
 - [MongoDB Community Server](https://www.mongodb.com/try/download/community)
 - [Java Downloads](https://www.oracle.com/java/technologies/downloads/#java11)
+
+### Date: 08/29/2023
+- **Hours:** 1
+- **Activity:** Planned the User Registration Form and User Profile. Analyzed the top 3 fitness apps and top 3 diet and nutrition apps for 2023 to determine the best user experience for the Nook Fitness app.
+- **Resources:**
+- [Nook Fitness: Exercise & Nutrition Doc](https://docs.google.com/document/d/16Z3n3iQjZlTL251MXUGQGJWHod5xHMn-ZajpGxGE6is/edit?usp=sharing)
