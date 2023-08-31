@@ -109,3 +109,9 @@ Downloaded and installed Java JDK 11.0.20 to address compatability issue with An
 - **Activity:** Planned the User Registration Form and User Profile. Analyzed the top 3 fitness apps and top 3 diet and nutrition apps for 2023 to determine the best user experience for the Nook Fitness app.
 - **Resources:**
 - [Nook Fitness: Exercise & Nutrition Doc](https://docs.google.com/document/d/16Z3n3iQjZlTL251MXUGQGJWHod5xHMn-ZajpGxGE6is/edit?usp=sharing)
+
+### Date: 08/30/2023
+- **Hours:** 4
+- **Activity:** Created the User Registration Form Screen. Planned the components to handle TDEE calculation and workout plan selection.
+- **Resources:**
+- [Nook Fitness: User Registration Components Sprints](https://docs.google.com/document/d/1DfjaNgvqkfxaZH6XhzlX8GQYElLKuZufuj6Wn-y-GSU/edit?usp=sharing)
