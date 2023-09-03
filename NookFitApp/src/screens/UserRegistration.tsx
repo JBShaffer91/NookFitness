@@ -1,47 +1,55 @@
-// UserRegistration.tsx
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useDispatch } from 'react-redux';
+import { setUserProfile } from '../reducers/userReducer';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const UserRegistration = () => {
+// Define the type for the navigation prop and the navigator's route names
+type RootStackParamList = {
+  UserRegistration: undefined;
+  TDEE: undefined; // Add other screen names as needed
+};
+
+type UserRegistrationScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'UserRegistration'
+>;
+
+type Props = {
+  navigation: UserRegistrationScreenNavigationProp;
+};
+
+const UserRegistration: React.FC<Props> = ({ navigation }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    firstName: '',
+    lastName: '',
     password: '',
-    age: '',
     gender: '',
-    height: '',
-    weight: '',
-    activityLevel: '',
-    weightLossGoal: '',
-    dietPreference: '',
-    allergies: [],
-    fitnessExperience: '',
-    workoutPreference: '',
-    healthConcerns: ''
   });
 
+  const dispatch = useDispatch();
+
   const handleSubmit = () => {
-    // Handle form submission logic here
-    // e.g., API call to register the user
+    dispatch(setUserProfile(formData));
+    navigation.navigate('TDEE'); // Navigate to the TDEE screen
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>User Registration</Text>
+      <Text style={styles.title}>Welcome to Nook Fitness! Let's create your profile!</Text>
 
       <TextInput
-        placeholder="Name"
-        value={formData.name}
-        onChangeText={(text) => setFormData({ ...formData, name: text })}
+        placeholder="First Name"
+        value={formData.firstName}
+        onChangeText={(text) => setFormData({ ...formData, firstName: text })}
         style={styles.input}
       />
 
       <TextInput
-        placeholder="Email"
-        value={formData.email}
-        onChangeText={(text) => setFormData({ ...formData, email: text })}
+        placeholder="Last Name"
+        value={formData.lastName}
+        onChangeText={(text) => setFormData({ ...formData, lastName: text })}
         style={styles.input}
       />
 
@@ -53,8 +61,6 @@ const UserRegistration = () => {
         style={styles.input}
       />
 
-      {/* ... Add other input fields similarly ... */}
-
       <Picker
         selectedValue={formData.gender}
         onValueChange={(itemValue: string) =>
@@ -62,13 +68,9 @@ const UserRegistration = () => {
         }>
         <Picker.Item label="Male" value="male" />
         <Picker.Item label="Female" value="female" />
-        {/* ... Add other options as needed ... */}
       </Picker>
 
-      {/* ... Add other pickers for activity level, diet preference, etc. ... */}
-
-      <Button title="Register" onPress={handleSubmit} />
-
+      <Button title="Next" onPress={handleSubmit} />
     </View>
   );
 };
