@@ -6,6 +6,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 type RootStackParamList = {
   UserRegistration: undefined;
   TDEEScreen: undefined;
+  FitnessGoalSelection: undefined;
 };
 
 type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
@@ -13,14 +14,14 @@ type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
 const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
   const [formData, setFormData] = useState({
     age: '',
-    height: '',
+    heightFeet: '',
+    heightInches: '',
     weight: '',
     activityLevel: '',
   });
 
   const handleSubmit = () => {
-    // Handle form submission logic here
-    navigation.goBack();
+    navigation.navigate('FitnessGoalSelection');
   };
 
   return (
@@ -39,15 +40,23 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
       />
 
       <TextInput
-        placeholder="Height (in cm)"
-        value={formData.height}
-        onChangeText={(text) => setFormData({ ...formData, height: text })}
+        placeholder="Height (feet)"
+        value={formData.heightFeet}
+        onChangeText={(text) => setFormData({ ...formData, heightFeet: text })}
         keyboardType="numeric"
         style={styles.input}
       />
 
       <TextInput
-        placeholder="Weight (in kg)"
+        placeholder="Height (inches)"
+        value={formData.heightInches}
+        onChangeText={(text) => setFormData({ ...formData, heightInches: text })}
+        keyboardType="numeric"
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Weight (in lbs)"
         value={formData.weight}
         onChangeText={(text) => setFormData({ ...formData, weight: text })}
         keyboardType="numeric"

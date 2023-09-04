@@ -10,8 +10,12 @@ import { store } from './src/store';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import UserRegistration from './src/screens/UserRegistration';
-import TDEEScreen from './src/screens/TDEEScreen'; // Import the TDEE screen
-import { SafeAreaProvider } from 'react-native-safe-area-context'; // Import SafeAreaProvider
+import TDEEScreen from './src/screens/TDEEScreen';
+import FitnessGoalSelection from './src/screens/FitnessGoalSelection';
+import WorkoutSettings from './src/screens/WorkoutSettings';
+import DietaryPreferencesAllergies from './src/screens/DietaryPreferencesAllergies';
+import HealthConcernsInjuries from './src/screens/HealthConcernsInjuries';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Create a stack navigator
 const Stack = createStackNavigator();
@@ -45,7 +49,7 @@ function App(): JSX.Element {
               }}
             />
             <Stack.Screen
-              name="TDEE"
+              name="TDEEScreen"
               component={TDEEScreen}
               options={{
                 title: 'TDEE Information',
@@ -56,7 +60,54 @@ function App(): JSX.Element {
                 headerTitleStyle: styles.title,
               }}
             />
-            {/* Add other screens as needed */}
+            <Stack.Screen
+              name="FitnessGoalSelection"
+              component={FitnessGoalSelection}
+              options={{
+                title: 'Select Fitness Goals',
+                headerStyle: {
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                },
+                headerTintColor: isDarkMode ? 'white' : 'black',
+                headerTitleStyle: styles.title,
+              }}
+            />
+            <Stack.Screen
+              name="WorkoutSettings"
+              component={WorkoutSettings}
+              options={{
+                title: 'Workout Settings',
+                headerStyle: {
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                },
+                headerTintColor: isDarkMode ? 'white' : 'black',
+                headerTitleStyle: styles.title,
+              }}
+            />
+            <Stack.Screen
+              name="DietaryPreferencesAllergies"
+              component={DietaryPreferencesAllergies}
+              options={{
+                title: 'Dietary Preferences & Allergies',
+                headerStyle: {
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                },
+                headerTintColor: isDarkMode ? 'white' : 'black',
+                headerTitleStyle: styles.title,
+              }}
+            />
+            <Stack.Screen
+              name="HealthConcernsInjuries"
+              component={HealthConcernsInjuries}
+              options={{
+                title: 'Health Concerns & Injuries',
+                headerStyle: {
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                },
+                headerTintColor: isDarkMode ? 'white' : 'black',
+                headerTitleStyle: styles.title,
+              }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

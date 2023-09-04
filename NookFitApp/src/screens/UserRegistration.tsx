@@ -5,10 +5,9 @@ import { useDispatch } from 'react-redux';
 import { setUserProfile } from '../reducers/userReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-// Define the type for the navigation prop and the navigator's route names
 type RootStackParamList = {
   UserRegistration: undefined;
-  TDEE: undefined; // Add other screen names as needed
+  TDEEScreen: undefined;
 };
 
 type UserRegistrationScreenNavigationProp = StackNavigationProp<
@@ -25,14 +24,14 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
     firstName: '',
     lastName: '',
     password: '',
-    gender: '',
+    presentation: '',
   });
 
   const dispatch = useDispatch();
 
   const handleSubmit = () => {
     dispatch(setUserProfile(formData));
-    navigation.navigate('TDEE'); // Navigate to the TDEE screen
+    navigation.navigate('TDEEScreen');
   };
 
   return (
@@ -61,13 +60,15 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
         style={styles.input}
       />
 
+      <Text style={styles.subTitle}>How do you present?</Text>
       <Picker
-        selectedValue={formData.gender}
+        selectedValue={formData.presentation}
         onValueChange={(itemValue: string) =>
-          setFormData({ ...formData, gender: itemValue })
+          setFormData({ ...formData, presentation: itemValue })
         }>
-        <Picker.Item label="Male" value="male" />
-        <Picker.Item label="Female" value="female" />
+        <Picker.Item label="Masculine" value="masculine" />
+        <Picker.Item label="Feminine" value="feminine" />
+        <Picker.Item label="Non-Binary" value="non-binary" />
       </Picker>
 
       <Button title="Next" onPress={handleSubmit} />
@@ -85,6 +86,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20
+  },
+  subTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 10
   },
   input: {
     height: 40,
