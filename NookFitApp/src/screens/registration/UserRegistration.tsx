@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useDispatch } from 'react-redux';
-import { setUserProfile } from '../reducers/userReducer';
+import { setUserProfile } from '../../reducers/userReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type RootStackParamList = {

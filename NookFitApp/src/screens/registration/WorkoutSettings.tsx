@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 
@@ -31,7 +31,10 @@ const WorkoutSettings = ({ navigation }: { navigation: WorkoutSettingsNavigation
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView 
+    style={styles.container}
+    contentContainerStyle={{ justifyContent: 'center', paddingBottom: 50 }}
+    >
       <Text style={styles.title}>Workout Frequency & Duration</Text>
 
       <Text style={styles.subTitle}>How often do you work out in a week?</Text>
@@ -75,7 +78,7 @@ const WorkoutSettings = ({ navigation }: { navigation: WorkoutSettingsNavigation
         title="NEXT" 
         onPress={() => navigation.navigate('DietaryPreferencesAllergies')} 
       />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -83,8 +86,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
-    marginTop: 200,
   },
   title: {
     fontSize: 24,

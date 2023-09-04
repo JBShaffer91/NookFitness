@@ -9,12 +9,12 @@ import { Provider } from 'react-redux';
 import { store } from './src/store';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import UserRegistration from './src/screens/UserRegistration';
-import TDEEScreen from './src/screens/TDEEScreen';
-import FitnessGoalSelection from './src/screens/FitnessGoalSelection';
-import WorkoutSettings from './src/screens/WorkoutSettings';
-import DietaryPreferencesAllergies from './src/screens/DietaryPreferencesAllergies';
-import HealthConcernsInjuries from './src/screens/HealthConcernsInjuries';
+import UserRegistration from './src/screens/registration/UserRegistration';
+import TDEEScreen from './src/screens/registration/TDEEScreen';
+import FitnessGoalSelection from './src/screens/registration/FitnessGoalSelection';
+import WorkoutSettings from './src/screens/registration/WorkoutSettings';
+import DietaryPreferencesAllergies from './src/screens/registration/DietaryPreferencesAllergies';
+import HealthConcernsInjuries from './src/screens/registration/HealthConcernsInjuries';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Create a stack navigator
