@@ -12,7 +12,12 @@ const PROFILE_UPDATE_FAILED_ERROR = 'Profile update failed.';
 const PROFILE_DELETE_FAILED_ERROR = 'Profile deletion failed.';
 
 // Utility function to get users collection
-const getUsersCollection = (req) => req.app.locals.db.collection('users');
+const getUsersCollection = (req) => {
+    if (!req.app.locals.db) {
+        throw new Error("Database not initialized");
+    }
+    return req.app.locals.db.collection('users');
+};
 
 // Middleware for JWT authentication
 const authenticateJWT = (req, res, next) => {
@@ -38,7 +43,7 @@ router.post('/register', [
 ], async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ message: errors.array()[0].msg });
     }
 
     try {
@@ -47,13 +52,15 @@ router.post('/register', [
 
         const existingUser = await usersCollection.findOne({ email });
         if (existingUser) {
-            return res.status(400).send(USER_EXISTS_ERROR);
+            return res.status(400).json({ message: USER_EXISTS_ERROR });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         await usersCollection.insertOne({ username, email, password: hashedPassword });
-        res.status(201).send('User registered successfully!');
+        res.status(201).json({ message: 'User registered successfully!' });
     } catch (error) {
+        console.error('Registration Error:', error.message);
+        console.error('Stack Trace:', error.stack);
         next(error);
     }
 });
@@ -67,18 +74,20 @@ router.post('/login', async (req, res, next) => {
         const user = await usersCollection.findOne({ email });
 
         if (!user) {
-            return res.status(400).send(USER_NOT_FOUND_ERROR);
+            return res.status(400).json({ message: USER_NOT_FOUND_ERROR });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).send(INVALID_CREDENTIALS_ERROR);
+            return res.status(400).json({ message: INVALID_CREDENTIALS_ERROR });
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ token });
     } catch (error) {
+        console.error('Login Error:', error.message);
+        console.error('Stack Trace:', error.stack);
         next(error);
     }
 });
@@ -92,12 +101,14 @@ router.get('/profile/:userId', authenticateJWT, async (req, res, next) => {
         const user = await usersCollection.findOne({ _id: ObjectId(userId) });
 
         if (!user) {
-            return res.status(404).send(USER_NOT_FOUND_ERROR);
+            return res.status(404).json({ message: USER_NOT_FOUND_ERROR });
         }
 
         delete user.password; // Remove password before sending
         res.status(200).json(user);
     } catch (error) {
+        console.error('Fetch Profile Error:', error.message);
+        console.error('Stack Trace:', error.stack);
         next(error);
     }
 });
@@ -112,11 +123,13 @@ router.put('/profile/:userId', authenticateJWT, async (req, res, next) => {
         const result = await usersCollection.updateOne({ _id: ObjectId(userId) }, { $set: { username, email, age, height, weight } });
 
         if (result.modifiedCount === 0) {
-            return res.status(400).send(PROFILE_UPDATE_FAILED_ERROR);
+            return res.status(400).json({ message: PROFILE_UPDATE_FAILED_ERROR });
         }
 
-        res.status(200).send('Profile updated successfully!');
+        res.status(200).json({ message: 'Profile updated successfully!' });
     } catch (error) {
+        console.error('Update Profile Error:', error.message);
+        console.error('Stack Trace:', error.stack);
         next(error);
     }
 });
@@ -130,19 +143,22 @@ router.delete('/profile/:userId', authenticateJWT, async (req, res, next) => {
         const result = await usersCollection.deleteOne({ _id: ObjectId(userId) });
 
         if (result.deletedCount === 0) {
-            return res.status(400).send(PROFILE_DELETE_FAILED_ERROR);
+            return res.status(400).json({ message: PROFILE_DELETE_FAILED_ERROR });
         }
 
-        res.status(200).send('Profile deleted successfully!');
+        res.status(200).json({ message: 'Profile deleted successfully!' });
     } catch (error) {
+        console.error('Delete Profile Error:', error.message);
+        console.error('Stack Trace:', error.stack);
         next(error);
     }
 });
 
 // Error handling middleware
 router.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something went wrong!');
+    console.error('Unhandled Error:', err.message);
+    console.error('Stack Trace:', err.stack);
+    res.status(500).json({ message: 'Something went wrong!' });
 });
 
 module.exports = router;

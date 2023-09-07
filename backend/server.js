@@ -21,7 +21,10 @@ app.use(cors());
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/NookFitDB';
 
 mongoose.connect(MONGO_URI, { useUnifiedTopology: true, useNewUrlParser: true })
-  .then(() => console.log('Connected to MongoDB using Mongoose'))
+  .then(() => {
+    console.log('Connected to MongoDB using Mongoose');
+    app.locals.db = mongoose.connection.getClient().db('NookFitDB');
+  })
   .catch(err => {
     console.error('Error connecting to MongoDB:', err);
     process.exit(1);

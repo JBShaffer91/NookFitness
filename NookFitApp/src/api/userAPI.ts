@@ -1,5 +1,3 @@
-// NookFitApp/src/api/userAPI.ts
-
 import { BACKEND_URL } from '@env';
 
 export const registerUser = async (userData: any) => {
@@ -12,14 +10,22 @@ export const registerUser = async (userData: any) => {
       body: JSON.stringify(userData),
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'An error occurred during registration.');
+    // Check if the content type is JSON before parsing
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'An error occurred during registration.');
+      }
+      return data;
+    } else {
+      // If not JSON, just get the text response
+      const text = await response.text();
+      throw new Error(text || 'An error occurred during registration.');
     }
-
-    return data;
   } catch (error) {
     throw error;
   }
 };
+
+export default registerUser;
