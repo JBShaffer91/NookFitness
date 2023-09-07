@@ -3,7 +3,7 @@ const axios = require('axios');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose'); // Added this line for Mongoose
 const userRoutes = require('./routes/userRoutes');
 const foodRoutes = require('./routes/foodRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
@@ -17,18 +17,15 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cors());
 
-// MongoDB Connection setup
+// MongoDB Connection setup using Mongoose
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/NookFitDB';
-const client = new MongoClient(MONGO_URI, { useUnifiedTopology: true });
 
-client.connect(err => {
-  if (err) {
+mongoose.connect(MONGO_URI, { useUnifiedTopology: true, useNewUrlParser: true })
+  .then(() => console.log('Connected to MongoDB using Mongoose'))
+  .catch(err => {
     console.error('Error connecting to MongoDB:', err);
     process.exit(1);
-  }
-  console.log('Connected to MongoDB database.');
-  app.locals.db = client.db('NookFitDB');
-});
+  });
 
 // Routes
 app.use('/api/food', foodRoutes);
