@@ -20,6 +20,30 @@ type Props = {
   navigation: UserRegistrationScreenNavigationProp;
 };
 
+type UserData = {
+  username: string;
+  email: string;
+  password: string;
+  presentation: string;
+};
+
+const signInUser = async (data: UserData) => {
+  try {
+    const response = await fetch('YOUR_BACKEND_LOGIN_ENDPOINT', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+    return responseData;
+  } catch (error) {
+    throw new Error('Error signing in user.');
+  }
+};
+
 const UserRegistration: React.FC<Props> = ({ navigation }) => {
   const [formData, setFormData] = useState({
     username: '',
@@ -33,20 +57,32 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
   const handleSubmit = async () => {
     try {
       const response = await registerUser(formData);
+      
       if (response.message) {
-        Alert.alert('Registration Message', response.message);
+        if (response.message === 'User already exists.') {
+          // If user already exists, try to sign them in
+          const signInResponse = await signInUser(formData);
+          if (signInResponse.success) {
+            dispatch(setUserProfile(formData));
+            navigation.navigate('TDEEScreen');
+          } else {
+            Alert.alert('Sign In Message', signInResponse.message);
+          }
+        } else {
+          Alert.alert('Registration Message', response.message);
+        }
       } else {
         dispatch(setUserProfile(formData));
         navigation.navigate('TDEEScreen');
       }
     } catch (error) {
       if (error instanceof Error) {
-        Alert.alert('Registration Error', error.message || 'Unable to register. Please check your connection and try again.');
+        Alert.alert('Error', error.message || 'Unable to process. Please check your connection and try again.');
       } else {
-        Alert.alert('Registration Error', 'Unable to register. Please check your connection and try again.');
+        Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
       }
     }
-  };
+  };  
 
   return (
     <View style={styles.container}>
