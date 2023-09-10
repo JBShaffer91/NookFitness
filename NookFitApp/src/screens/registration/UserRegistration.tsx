@@ -45,7 +45,7 @@ const signInUser = async (data: UserData) => {
 };
 
 const UserRegistration: React.FC<Props> = ({ navigation }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<UserData>({
     username: '',
     email: '',
     password: '',
