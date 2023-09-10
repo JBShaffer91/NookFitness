@@ -115,3 +115,14 @@ Downloaded and installed Java JDK 11.0.20 to address compatability issue with An
 - **Activity:** Created the User Registration Form Screen. Planned the components to handle TDEE calculation and workout plan selection.
 - **Resources:**
 - [Nook Fitness: User Registration Components Sprints](https://docs.google.com/document/d/1DfjaNgvqkfxaZH6XhzlX8GQYElLKuZufuj6Wn-y-GSU/edit?usp=sharing)
+
+### Date: 09/09/2023
+- **Hours:** 3
+- **Activity:**
+- Reaserched other fitness apps to determine the best user experience for the Nook Fitness app.
+- Tested BetterMe and Mad Muscles to gain a better understanding of the user experiences they provide. Compared them against the current design of Nook Fitness, and determined that the trajectory of the project is on the right path.
+- **Insights:** Implementing workout gifs and videos will be a challenging feature to implement, but critical to the user experience.
+- **Ideas:** Implementing a Spotify integration will be a great way to enhance the user experience.
+- **Resources:**
+- [BetterMe](https://play.google.com/store/apps/details?id=com.gen.workoutme&hl=en_US&gl=US)
+- [Mad Muscles](https://play.google.com/store/apps/details?id=com.amomedia.madmuscles&hl=en_US&gl=US)
