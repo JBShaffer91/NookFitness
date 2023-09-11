@@ -8,7 +8,7 @@ import { registerUser } from '../../api/userAPI';
 
 type RootStackParamList = {
   UserRegistration: undefined;
-  TDEEScreen: undefined;
+  HomePage: undefined; // Updated to HomePage
 };
 
 type UserRegistrationScreenNavigationProp = StackNavigationProp<
@@ -64,7 +64,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
           const signInResponse = await signInUser(formData);
           if (signInResponse.success) {
             dispatch(setUserProfile(formData));
-            navigation.navigate('TDEEScreen');
+            navigation.navigate('HomePage'); // Navigate to HomePage after successful sign-in
           } else {
             Alert.alert('Sign In Message', signInResponse.message);
           }
@@ -73,7 +73,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
         }
       } else {
         dispatch(setUserProfile(formData));
-        navigation.navigate('TDEEScreen');
+        navigation.navigate('HomePage'); // Navigate to HomePage after successful registration
       }
     } catch (error) {
       if (error instanceof Error) {

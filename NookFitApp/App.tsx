@@ -15,6 +15,10 @@ import FitnessGoalSelection from './src/screens/registration/FitnessGoalSelectio
 import WorkoutSettings from './src/screens/registration/WorkoutSettings';
 import DietaryPreferencesAllergies from './src/screens/registration/DietaryPreferencesAllergies';
 import HealthConcernsInjuries from './src/screens/registration/HealthConcernsInjuries';
+import HomePage from './src/screens/profile/HomePage'; // Importing HomePage
+import FoodDiary from './src/screens/profile/FoodDiary'; // Importing FoodDiary
+import ToDoList from './src/screens/profile/ToDoList'; // Importing ToDoList
+import WaterIntake from './src/screens/profile/WaterIntake'; // Importing WaterIntake
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Create a stack navigator
@@ -101,6 +105,55 @@ function App(): JSX.Element {
               component={HealthConcernsInjuries}
               options={{
                 title: 'Health Concerns & Injuries',
+                headerStyle: {
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                },
+                headerTintColor: isDarkMode ? 'white' : 'black',
+                headerTitleStyle: styles.title,
+              }}
+            />
+            {/* Adding new screens */}
+            <Stack.Screen
+              name="HomePage"
+              component={HomePage}
+              options={{
+                title: 'Profile Home',
+                headerStyle: {
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                },
+                headerTintColor: isDarkMode ? 'white' : 'black',
+                headerTitleStyle: styles.title,
+              }}
+            />
+            <Stack.Screen
+              name="FoodDiary"
+              component={FoodDiary}
+              options={{
+                title: 'Food Diary',
+                headerStyle: {
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                },
+                headerTintColor: isDarkMode ? 'white' : 'black',
+                headerTitleStyle: styles.title,
+              }}
+            />
+            <Stack.Screen
+              name="ToDoList"
+              component={ToDoList}
+              options={{
+                title: 'To-Do List',
+                headerStyle: {
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                },
+                headerTintColor: isDarkMode ? 'white' : 'black',
+                headerTitleStyle: styles.title,
+              }}
+            />
+            <Stack.Screen
+              name="WaterIntake"
+              component={WaterIntake}
+              options={{
+                title: 'Water Intake',
                 headerStyle: {
                   backgroundColor: isDarkMode ? 'black' : 'white',
                 },
