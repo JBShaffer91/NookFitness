@@ -8,7 +8,7 @@ import { registerUser } from '../../api/userAPI';
 
 type RootStackParamList = {
   UserRegistration: undefined;
-  HomePage: undefined; // Updated to HomePage
+  HomePage: undefined;
 };
 
 type UserRegistrationScreenNavigationProp = StackNavigationProp<
@@ -29,7 +29,7 @@ type UserData = {
 
 const signInUser = async (data: UserData) => {
   try {
-    const response = await fetch('YOUR_BACKEND_LOGIN_ENDPOINT', {
+    const response = await fetch('http://localhost:3000/api/users/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,6 +45,7 @@ const signInUser = async (data: UserData) => {
 };
 
 const UserRegistration: React.FC<Props> = ({ navigation }) => {
+  const [isSignIn, setIsSignIn] = useState(false); // Toggle between Sign In and Registration
   const [formData, setFormData] = useState<UserData>({
     username: '',
     email: '',
@@ -54,17 +55,30 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
+  const handleSignIn = async () => {
+    try {
+      const signInResponse = await signInUser(formData);
+      if (signInResponse.success) {
+        dispatch(setUserProfile(formData));
+        navigation.navigate('HomePage');
+      } else {
+        Alert.alert('Sign In Message', signInResponse.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Unable to sign in. Please check your connection and try again.');
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       const response = await registerUser(formData);
       
       if (response.message) {
         if (response.message === 'User already exists.') {
-          // If user already exists, try to sign them in
           const signInResponse = await signInUser(formData);
           if (signInResponse.success) {
             dispatch(setUserProfile(formData));
-            navigation.navigate('HomePage'); // Navigate to HomePage after successful sign-in
+            navigation.navigate('HomePage');
           } else {
             Alert.alert('Sign In Message', signInResponse.message);
           }
@@ -73,55 +87,70 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
         }
       } else {
         dispatch(setUserProfile(formData));
-        navigation.navigate('HomePage'); // Navigate to HomePage after successful registration
+        navigation.navigate('HomePage');
       }
     } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert('Error', error.message || 'Unable to process. Please check your connection and try again.');
-      } else {
-        Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
-      }
+      Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
     }
-  };  
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Nook Fitness! Let's create your profile!</Text>
-
-      <TextInput
-        placeholder="Name"
-        value={formData.username}
-        onChangeText={(text) => setFormData({ ...formData, username: text })}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="Email"
-        value={formData.email}
-        onChangeText={(text) => setFormData({ ...formData, email: text })}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="Password"
-        value={formData.password}
-        onChangeText={(text) => setFormData({ ...formData, password: text })}
-        secureTextEntry={true}
-        style={styles.input}
-      />
-
-      <Text style={styles.subTitle}>How do you present?</Text>
-      <Picker
-        selectedValue={formData.presentation}
-        onValueChange={(itemValue: string) =>
-          setFormData({ ...formData, presentation: itemValue })
-        }>
-        <Picker.Item label="Masculine" value="masculine" />
-        <Picker.Item label="Feminine" value="feminine" />
-        <Picker.Item label="Non-Binary" value="non-binary" />
-      </Picker>
-
-      <Button title="Next" onPress={handleSubmit} />
+      {isSignIn ? (
+        <>
+          <Text style={styles.title}>Welcome back to Nook Fitness! Sign In to continue.</Text>
+          <TextInput
+            placeholder="Email"
+            value={formData.email}
+            onChangeText={(text) => setFormData({ ...formData, email: text })}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Password"
+            value={formData.password}
+            onChangeText={(text) => setFormData({ ...formData, password: text })}
+            secureTextEntry={true}
+            style={styles.input}
+          />
+          <Button title="Sign In" onPress={handleSignIn} />
+          <Text style={{ textAlign: 'center', marginTop: 10 }} onPress={() => setIsSignIn(false)}>New here? Register</Text>
+        </>
+      ) : (
+        <>
+          <Text style={styles.title}>Welcome to Nook Fitness! Let's create your profile!</Text>
+          <TextInput
+            placeholder="Name"
+            value={formData.username}
+            onChangeText={(text) => setFormData({ ...formData, username: text })}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Email"
+            value={formData.email}
+            onChangeText={(text) => setFormData({ ...formData, email: text })}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Password"
+            value={formData.password}
+            onChangeText={(text) => setFormData({ ...formData, password: text })}
+            secureTextEntry={true}
+            style={styles.input}
+          />
+          <Text style={styles.subTitle}>How do you present?</Text>
+          <Picker
+            selectedValue={formData.presentation}
+            onValueChange={(itemValue: string) =>
+              setFormData({ ...formData, presentation: itemValue })
+            }>
+            <Picker.Item label="Masculine" value="masculine" />
+            <Picker.Item label="Feminine" value="feminine" />
+            <Picker.Item label="Non-Binary" value="non-binary" />
+          </Picker>
+          <Button title="Next" onPress={handleSubmit} />
+          <Text style={{ textAlign: 'center', marginTop: 10 }} onPress={() => setIsSignIn(true)}>Already a user? Sign In</Text>
+        </>
+      )}
     </View>
   );
 };
