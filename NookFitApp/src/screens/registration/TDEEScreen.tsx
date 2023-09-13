@@ -2,14 +2,23 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useMutation } from '@apollo/client'; // Import Apollo Client hook
+import gql from 'graphql-tag'; // Import GraphQL tag
 
 type RootStackParamList = {
   UserRegistration: undefined;
   TDEEScreen: undefined;
-  FitnessGoalSelection: undefined;
+  DietaryPreferencesAllergies: undefined;
 };
 
 type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
+
+// Define your GraphQL mutation (replace with your actual mutation)
+const SEND_TDEE_DATA = gql`
+  mutation SendTDEEData($age: Int!, $heightFeet: Int!, $heightInches: Int!, $weight: Int!, $activityLevel: String!) {
+    // Your mutation fields go here...
+  }
+`;
 
 const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
   const [formData, setFormData] = useState({
@@ -20,8 +29,30 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
     activityLevel: '',
   });
 
-  const handleSubmit = () => {
-    navigation.navigate('FitnessGoalSelection');
+  // Use Apollo Client's useMutation hook
+  const [sendTDEEData] = useMutation(SEND_TDEE_DATA);
+
+  const handleSubmit = async () => {
+    try {
+      // Send data to the Suggestic API
+      const response = await sendTDEEData({
+        variables: {
+          age: parseInt(formData.age),
+          heightFeet: parseInt(formData.heightFeet),
+          heightInches: parseInt(formData.heightInches),
+          weight: parseInt(formData.weight),
+          activityLevel: formData.activityLevel,
+        },
+      });
+
+      // Handle the response or errors
+      if (response.data) {
+        // Navigate to the next screen or handle the response as needed
+        navigation.navigate('DietaryPreferencesAllergies');
+      }
+    } catch (error) {
+      console.error('Error sending TDEE data:', error);
+    }
   };
 
   return (
