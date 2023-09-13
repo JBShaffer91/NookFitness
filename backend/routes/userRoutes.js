@@ -39,16 +39,20 @@ const authenticateJWT = (req, res, next) => {
 router.post('/register', [
     check('email').isEmail(),
     check('password').isLength({ min: 6 }),
-    check('username').notEmpty()
+    check('username').notEmpty(),
+    check('presentation').notEmpty()
 ], async (req, res, next) => {
+    console.log("Registration Request Body:", req.body); // Added logging for request body
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ message: errors.array()[0].msg });
+        console.log("Validation Errors:", errors.array()); // Added logging for validation errors
+        return res.status(400).json({ message: errors.array().map(err => err.msg).join(', ') }); // Return all validation errors
     }
 
     try {
         const usersCollection = getUsersCollection(req);
-        const { username, email, password } = req.body;
+        const { username, email, password, presentation } = req.body;
 
         const existingUser = await usersCollection.findOne({ email });
         if (existingUser) {
@@ -56,7 +60,7 @@ router.post('/register', [
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        await usersCollection.insertOne({ username, email, password: hashedPassword });
+        await usersCollection.insertOne({ username, email, password: hashedPassword, presentation });
         res.status(201).json({ message: 'User registered successfully!' });
     } catch (error) {
         console.error('Registration Error:', error.message);
@@ -101,7 +105,7 @@ router.get('/profile/:userId', authenticateJWT, async (req, res, next) => {
         const user = await usersCollection.findOne({ _id: ObjectId(userId) });
 
         if (!user) {
-            return res.status(404).json({ message: USER_NOT_FOUND_ERROR });
+            return res.status(404).json({ message: errors.array().map(err => err.msg).join(', ') });
         }
 
         delete user.password; // Remove password before sending

@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { setUserProfile } from '../../reducers/userReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { registerUser } from '../../api/userAPI';
+import { BACKEND_URL } from '@env';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -21,31 +22,45 @@ type Props = {
 };
 
 type UserData = {
-  username: string;
+  username?: string;
   email: string;
   password: string;
-  presentation: string;
+  presentation?: string;
 };
 
 const signInUser = async (data: UserData) => {
+  console.log("Attempting to sign in with data:", data);
+
   try {
-    const response = await fetch('http://localhost:3000/api/users/login', {
+    const response = await fetch(`${BACKEND_URL}/api/users/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password
+      }),
     });
 
+    console.log("SignIn Response:", response);
+    console.log("SignIn Response Status:", response.status);
+
+    // Clone the response to read it as text for debugging
+    const clonedResponse = response.clone();
+    console.log("SignIn Response Text:", await clonedResponse.text());
+
     const responseData = await response.json();
+
     return responseData;
   } catch (error) {
+    console.error("SignIn Error:", error);
     throw new Error('Error signing in user.');
   }
 };
 
 const UserRegistration: React.FC<Props> = ({ navigation }) => {
-  const [isSignIn, setIsSignIn] = useState(false); // Toggle between Sign In and Registration
+  const [isSignIn, setIsSignIn] = useState(false);
   const [formData, setFormData] = useState<UserData>({
     username: '',
     email: '',
@@ -58,18 +73,21 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
   const handleSignIn = async () => {
     try {
       const signInResponse = await signInUser(formData);
-      if (signInResponse.success) {
+      if (signInResponse.token) {  // Check for the presence of the token
         dispatch(setUserProfile(formData));
         navigation.navigate('HomePage');
       } else {
-        Alert.alert('Sign In Message', signInResponse.message);
+        Alert.alert('Sign In Message', signInResponse.message || 'Unknown error occurred.');  // Provide a default message
       }
     } catch (error) {
+      console.error("handleSignIn Error:", error); // Added logging
       Alert.alert('Error', 'Unable to sign in. Please check your connection and try again.');
     }
   };
 
   const handleSubmit = async () => {
+    console.log("Attempting to register with data:", formData); // Added logging
+
     try {
       const response = await registerUser(formData);
       
@@ -90,6 +108,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
         navigation.navigate('HomePage');
       }
     } catch (error) {
+      console.error("handleSubmit Error:", error); // Added logging
       Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
     }
   };
