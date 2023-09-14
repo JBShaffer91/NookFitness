@@ -9,9 +9,11 @@ type RootStackParamList = {
   UserRegistration: undefined;
   TDEEScreen: undefined;
   FitnessGoalSelection: undefined;
+  HomePage: undefined; 
 };
 
 type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
+type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
 
 // Define your GraphQL mutation (replace with your actual mutation)
 const SEND_TDEE_DATA = gql`
@@ -114,6 +116,7 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
       </Picker>
 
       <Button title="Submit" onPress={handleSubmit} />
+      <Button title="Go to Home" onPress={() => navigation.navigate('HomePage')} />
     </View>
   );
 };
