@@ -8,7 +8,7 @@ import gql from 'graphql-tag'; // Import GraphQL tag
 type RootStackParamList = {
   UserRegistration: undefined;
   TDEEScreen: undefined;
-  DietaryPreferencesAllergies: undefined;
+  FitnessGoalSelection: undefined;
 };
 
 type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
@@ -16,7 +16,14 @@ type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
 // Define your GraphQL mutation (replace with your actual mutation)
 const SEND_TDEE_DATA = gql`
   mutation SendTDEEData($age: Int!, $heightFeet: Int!, $heightInches: Int!, $weight: Int!, $activityLevel: String!) {
-    // Your mutation fields go here...
+    createTDEEData(age: $age, heightFeet: $heightFeet, heightInches: $heightInches, weight: $weight, activityLevel: $activityLevel) {
+      id
+      age
+      heightFeet
+      heightInches
+      weight
+      activityLevel
+    }
   }
 `;
 
@@ -48,7 +55,7 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
       // Handle the response or errors
       if (response.data) {
         // Navigate to the next screen or handle the response as needed
-        navigation.navigate('DietaryPreferencesAllergies');
+        navigation.navigate('FitnessGoalSelection');
       }
     } catch (error) {
       console.error('Error sending TDEE data:', error);

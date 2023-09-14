@@ -22,6 +22,7 @@ import WaterIntake from './src/screens/profile/WaterIntake'; // Importing WaterI
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ApolloProvider } from '@apollo/client';
 import client from './src/apolloClient';
+import { View } from 'react-native';
 
 // Create a stack navigator
 const Stack = createStackNavigator();
@@ -36,7 +37,12 @@ function App(): JSX.Element {
   return (
     <ApolloProvider client={client}>
       <Provider store={store}>
-        <SafeAreaProvider style={{ flex: 1, backgroundColor: backgroundStyle.backgroundColor }}>
+        <SafeAreaProvider>
+          <View style={{ flex: 1, backgroundColor: backgroundStyle.backgroundColor }}>
+            <StatusBar
+              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+              backgroundColor={backgroundStyle.backgroundColor}
+    />
           <StatusBar
             barStyle={isDarkMode ? 'light-content' : 'dark-content'}
             backgroundColor={backgroundStyle.backgroundColor}
@@ -165,6 +171,7 @@ function App(): JSX.Element {
               />
             </Stack.Navigator>
           </NavigationContainer>
+          </View>
         </SafeAreaProvider>
       </Provider>
     </ApolloProvider>

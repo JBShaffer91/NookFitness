@@ -5,7 +5,10 @@ import { useDispatch } from 'react-redux';
 import { setUserProfile } from '../../reducers/userReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { registerUser } from '../../api/userAPI';
-import { BACKEND_URL } from '@env';
+import { BACKEND_URL, API_KEY_SUGGESTIC } from '@env';
+console.log(BACKEND_URL, API_KEY_SUGGESTIC);
+import { useMutation } from '@apollo/client';
+import gql from 'graphql-tag';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -28,36 +31,15 @@ type UserData = {
   presentation?: string;
 };
 
-const signInUser = async (data: UserData) => {
-  console.log("Attempting to sign in with data:", data);
-
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/users/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: data.email,
-        password: data.password
-      }),
-    });
-
-    console.log("SignIn Response:", response);
-    console.log("SignIn Response Status:", response.status);
-
-    // Clone the response to read it as text for debugging
-    const clonedResponse = response.clone();
-    console.log("SignIn Response Text:", await clonedResponse.text());
-
-    const responseData = await response.json();
-
-    return responseData;
-  } catch (error) {
-    console.error("SignIn Error:", error);
-    throw new Error('Error signing in user.');
+const CREATE_USER_IN_SUGGESTIC = gql`
+  mutation CreateUser($email: String!, $name: String!) {
+    createUser(email: $email, name: $name) {
+      id
+      email
+      name
+    }
   }
-};
+`;
 
 const UserRegistration: React.FC<Props> = ({ navigation }) => {
   const [isSignIn, setIsSignIn] = useState(false);
@@ -70,45 +52,87 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
+  const [createUser] = useMutation(CREATE_USER_IN_SUGGESTIC, {
+    context: {
+      headers: {
+        'Authorization': `token ${API_KEY_SUGGESTIC}`
+      }
+    }
+  });
+
+  const createUserInSuggestic = async (data: UserData) => {
+    try {
+      const response = await createUser({
+        variables: {
+          email: data.email,
+          name: data.username
+        }
+      });
+      return response.data; // Adjust based on the actual response structure
+    } catch (error) {
+      console.error("Error creating user in Suggestic:", error);
+      throw error;
+    }
+  };
+
+  const signInUser = async (data: UserData) => {
+    console.log("Attempting to sign in with data:", data);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+        }),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to sign in.');
+      }
+
+      return responseData;
+    } catch (error) {
+      console.error("SignIn Error:", error);
+      throw error;
+    }
+  };
+
   const handleSignIn = async () => {
     try {
       const signInResponse = await signInUser(formData);
-      if (signInResponse.token) {  // Check for the presence of the token
+      if (signInResponse.token) {
         dispatch(setUserProfile(formData));
         navigation.navigate('HomePage');
       } else {
-        Alert.alert('Sign In Message', signInResponse.message || 'Unknown error occurred.');  // Provide a default message
+        Alert.alert('Sign In Message', signInResponse.message || 'Unknown error occurred.');
       }
-    } catch (error) {
-      console.error("handleSignIn Error:", error); // Added logging
-      Alert.alert('Error', 'Unable to sign in. Please check your connection and try again.');
+    } catch (error: any) {
+      console.error("Error:", error.message || "An unknown error occurred");
+      Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
     }
   };
 
   const handleSubmit = async () => {
-    console.log("Attempting to register with data:", formData); // Added logging
-
     try {
       const response = await registerUser(formData);
       
-      if (response.message) {
-        if (response.message === 'User already exists.') {
-          const signInResponse = await signInUser(formData);
-          if (signInResponse.success) {
-            dispatch(setUserProfile(formData));
-            navigation.navigate('HomePage');
-          } else {
-            Alert.alert('Sign In Message', signInResponse.message);
-          }
-        } else {
-          Alert.alert('Registration Message', response.message);
-        }
+      if (response.message === 'User already exists.') {
+        handleSignIn();
+      } else if (response.message) {
+        Alert.alert('Registration Message', response.message);
       } else {
+        await createUserInSuggestic(formData); // Create user in Suggestic
         dispatch(setUserProfile(formData));
         navigation.navigate('HomePage');
       }
-    } catch (error) {
-      console.error("handleSubmit Error:", error); // Added logging
+    } catch (error: any) {
+      console.error("Error:", error.message || "An unknown error occurred");
       Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
     }
   };

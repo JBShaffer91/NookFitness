@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useMutation } from '@apollo/client';
+import gql from 'graphql-tag';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -13,6 +15,16 @@ type RootStackParamList = {
 };
 
 type DietaryPreferencesAllergiesNavigationProp = StackNavigationProp<RootStackParamList, 'DietaryPreferencesAllergies'>;
+
+const SEND_DIETARY_PREFERENCES = gql`
+  mutation SendDietaryPreferences($diet: String!, $allergies: String!) {
+    sendDietaryPreferences(diet: $diet, allergies: $allergies) {
+      id
+      diet
+      allergies
+    }
+  }
+`;
 
 const dietaryPreferences = [
   'Vegetarian',
@@ -28,6 +40,24 @@ const dietaryPreferences = [
 const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPreferencesAllergiesNavigationProp }) => {
   const [selectedDiet, setSelectedDiet] = useState<string>('');
   const [allergies, setAllergies] = useState<string>('');
+  const [sendDietaryPreferences] = useMutation(SEND_DIETARY_PREFERENCES);
+
+  const handleNext = async () => {
+    try {
+      const response = await sendDietaryPreferences({
+        variables: {
+          diet: selectedDiet,
+          allergies: allergies,
+        },
+      });
+
+      if (response.data) {
+        navigation.navigate('HealthConcernsInjuries');
+      }
+    } catch (error) {
+      console.error('Error sending dietary preferences:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -53,7 +83,7 @@ const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPrefer
 
       <Button 
         title="NEXT" 
-        onPress={() => navigation.navigate('HealthConcernsInjuries')} 
+        onPress={handleNext} 
       />
     </View>
   );
