@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useDispatch } from 'react-redux';
+import { setCaloricTarget } from '../../reducers/userReducer';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -16,6 +18,7 @@ type RootStackParamList = {
 type FitnessGoalNavigationProp = StackNavigationProp<RootStackParamList, 'DietaryPreferencesAllergies'>;
 
 const goals = [
+  '--Select your goal--',
   'Weight Loss',
   'Muscle Gain',
   'Improve Cardio',
@@ -25,21 +28,37 @@ const goals = [
 ];
 
 const FitnessGoalSelection = ({ navigation }: { navigation: FitnessGoalNavigationProp }) => {
+  const dispatch = useDispatch();
   const [selectedGoal, setSelectedGoal] = useState<string | undefined>(undefined);
   const [caloricAdjustment, setCaloricAdjustment] = useState<number>(0); // Default value
+  const [sliderKey, setSliderKey] = useState<number>(0); // Key for Slider
 
   const handleGoalChange = (goal: string) => {
     setSelectedGoal(goal);
+    let adjustment = 0;
     switch (goal) {
       case 'Weight Loss':
-        setCaloricAdjustment(-500); // Default deficit for weight loss
+        adjustment = -250; // Safe deficit for weight loss
         break;
       case 'Muscle Gain':
-        setCaloricAdjustment(500); // Default surplus for muscle gain
+        adjustment = 500; // Default surplus for muscle gain
         break;
-      default:
-        setCaloricAdjustment(0); // Maintenance
+      case 'Improve Cardio':
+        adjustment = 300; // Extra calories for cardio
+        break;
+      case 'Increase Strength':
+        adjustment = 500; // Increase calories for strength training
+        break;
+      case 'Flexibility & Mobility':
+        adjustment = 0; // Maintenance
+        break;
+      case 'General Fitness':
+        adjustment = 0; // Maintenance
+        break;
     }
+    setCaloricAdjustment(adjustment);
+    dispatch(setCaloricTarget(adjustment));
+    setSliderKey(prevKey => prevKey + 1);  // Increment the slider key
   };
 
   return (
@@ -57,6 +76,7 @@ const FitnessGoalSelection = ({ navigation }: { navigation: FitnessGoalNavigatio
 
       <Text style={styles.sliderLabel}>Adjust Caloric Intake:</Text>
       <Slider
+        key={sliderKey}
         value={caloricAdjustment}
         onValueChange={value => setCaloricAdjustment(value)}
         minimumValue={-1000}
