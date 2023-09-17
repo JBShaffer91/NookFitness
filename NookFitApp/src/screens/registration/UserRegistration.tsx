@@ -5,10 +5,7 @@ import { useDispatch } from 'react-redux';
 import { setUserProfile } from '../../reducers/userReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { registerUser } from '../../api/userAPI';
-import { BACKEND_URL, API_KEY_SUGGESTIC } from '@env';
-console.log(BACKEND_URL, API_KEY_SUGGESTIC);
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
+import { BACKEND_URL } from '@env';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -31,16 +28,6 @@ type UserData = {
   presentation?: string;
 };
 
-const CREATE_USER_IN_SUGGESTIC = gql`
-  mutation CreateUser($email: String!, $name: String!) {
-    createUser(email: $email, name: $name) {
-      id
-      email
-      name
-    }
-  }
-`;
-
 const UserRegistration: React.FC<Props> = ({ navigation }) => {
   const [isSignIn, setIsSignIn] = useState(false);
   const [formData, setFormData] = useState<UserData>({
@@ -51,29 +38,6 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
   });
 
   const dispatch = useDispatch();
-
-  const [createUser] = useMutation(CREATE_USER_IN_SUGGESTIC, {
-    context: {
-      headers: {
-        'Authorization': `token ${API_KEY_SUGGESTIC}`
-      }
-    }
-  });
-
-  const createUserInSuggestic = async (data: UserData) => {
-    try {
-      const response = await createUser({
-        variables: {
-          email: data.email,
-          name: data.username
-        }
-      });
-      return response.data; // Adjust based on the actual response structure
-    } catch (error) {
-      console.error("Error creating user in Suggestic:", error);
-      throw error;
-    }
-  };
 
   const signInUser = async (data: UserData) => {
     console.log("Attempting to sign in with data:", data);
@@ -127,7 +91,6 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       } else if (response.message) {
         Alert.alert('Registration Message', response.message);
       } else {
-        await createUserInSuggestic(formData); // Create user in Suggestic
         dispatch(setUserProfile(formData));
         navigation.navigate('HomePage');
       }

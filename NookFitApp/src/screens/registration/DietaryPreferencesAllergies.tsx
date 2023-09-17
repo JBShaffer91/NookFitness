@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
+import { useDispatch, useSelector } from 'react-redux';
+import { setMacronutrients } from '../../reducers/userReducer';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -16,15 +16,11 @@ type RootStackParamList = {
 
 type DietaryPreferencesAllergiesNavigationProp = StackNavigationProp<RootStackParamList, 'DietaryPreferencesAllergies'>;
 
-const SEND_DIETARY_PREFERENCES = gql`
-  mutation SendDietaryPreferences($diet: String!, $allergies: String!) {
-    sendDietaryPreferences(diet: $diet, allergies: $allergies) {
-      id
-      diet
-      allergies
-    }
-  }
-`;
+type ReduxState = {
+  user: {
+    caloricTarget: number;
+  };
+};
 
 const dietaryPreferences = [
   'Vegetarian',
@@ -38,25 +34,46 @@ const dietaryPreferences = [
 ];
 
 const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPreferencesAllergiesNavigationProp }) => {
+  const dispatch = useDispatch();
+  const caloricTarget = useSelector((state: ReduxState) => state.user.caloricTarget);
   const [selectedDiet, setSelectedDiet] = useState<string>('');
   const [allergies, setAllergies] = useState<string>('');
-  const [sendDietaryPreferences] = useMutation(SEND_DIETARY_PREFERENCES);
 
-  const handleNext = async () => {
-    try {
-      const response = await sendDietaryPreferences({
-        variables: {
-          diet: selectedDiet,
-          allergies: allergies,
-        },
-      });
-
-      if (response.data) {
-        navigation.navigate('HealthConcernsInjuries');
-      }
-    } catch (error) {
-      console.error('Error sending dietary preferences:', error);
+  const handleDietChange = (diet: string) => {
+    setSelectedDiet(diet);
+    let macros = { carbs: 0, protein: 0, fat: 0 };
+    switch (diet) {
+      case 'Vegetarian':
+        macros = { carbs: 0.55, protein: 0.25, fat: 0.20 };
+        break;
+      case 'Vegan':
+        macros = { carbs: 0.60, protein: 0.20, fat: 0.20 };
+        break;
+      case 'Pescatarian':
+        macros = { carbs: 0.50, protein: 0.30, fat: 0.20 };
+        break;
+      case 'Keto':
+        macros = { carbs: 0.05, protein: 0.20, fat: 0.75 };
+        break;
+      case 'Paleo':
+        macros = { carbs: 0.40, protein: 0.30, fat: 0.30 };
+        break;
+      case 'Gluten-Free':
+      case 'Dairy-Free':
+      case 'No Specific Diet':
+        macros = { carbs: 0.50, protein: 0.25, fat: 0.25 };
+        break;
     }
+    const calculatedMacros = {
+      carbs: Math.round(macros.carbs * caloricTarget / 4),
+      protein: Math.round(macros.protein * caloricTarget / 4),
+      fat: Math.round(macros.fat * caloricTarget / 9),
+    };
+    dispatch(setMacronutrients(calculatedMacros));
+  };
+
+  const handleNext = () => {
+    navigation.navigate('HealthConcernsInjuries');
   };
 
   return (
@@ -66,7 +83,7 @@ const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPrefer
       <Text style={styles.subTitle}>Dietary Preference:</Text>
       <Picker
         selectedValue={selectedDiet}
-        onValueChange={(itemValue: string) => setSelectedDiet(itemValue)}
+        onValueChange={(itemValue: string) => handleDietChange(itemValue)}
       >
         {dietaryPreferences.map(diet => (
           <Picker.Item key={diet} label={diet} value={diet} />

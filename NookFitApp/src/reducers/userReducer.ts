@@ -8,6 +8,7 @@ const initialState = {
   maintenanceCalories: null,
   caloricTarget: null,
   presentation: null,
+  macronutrients: null,
 };
 
 const userSlice = createSlice({
@@ -29,6 +30,9 @@ const userSlice = createSlice({
     setPresentation: (state, action) => {
       state.presentation = action.payload;
     },
+    setMacronutrients: (state, action) => {
+      state.macronutrients = action.payload;
+    }
   },
 });
 
@@ -37,7 +41,8 @@ export const {
   setToken, 
   setMaintenanceCalories,
   setCaloricTarget,
-  setPresentation
+  setPresentation,
+  setMacronutrients,
 } = userSlice.actions;
 
 export default userSlice.reducer;

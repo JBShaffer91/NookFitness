@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setMaintenanceCalories } from '../../reducers/userReducer';
-import { useSelector } from 'react-redux';
 
 type RootStackParamList = {
   UserRegistration: undefined;
