@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useMutation } from '@apollo/client'; // Import Apollo Client hook
-import gql from 'graphql-tag'; // Import GraphQL tag
+import { useDispatch } from 'react-redux';
+import { setMaintenanceCalories } from '../../reducers/userReducer';
+import { useSelector } from 'react-redux';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -13,21 +14,12 @@ type RootStackParamList = {
 };
 
 type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
-type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
 
-// Define your GraphQL mutation (replace with your actual mutation)
-const SEND_TDEE_DATA = gql`
-  mutation SendTDEEData($age: Int!, $heightFeet: Int!, $heightInches: Int!, $weight: Int!, $activityLevel: String!) {
-    createTDEEData(age: $age, heightFeet: $heightFeet, heightInches: $heightInches, weight: $weight, activityLevel: $activityLevel) {
-      id
-      age
-      heightFeet
-      heightInches
-      weight
-      activityLevel
-    }
-  }
-`;
+type ReduxState = {
+  user: {
+    presentation: 'masculine' | 'feminine' | 'non-binary';
+  };
+};
 
 const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
   const [formData, setFormData] = useState({
@@ -38,31 +30,47 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
     activityLevel: '',
   });
 
-  // Use Apollo Client's useMutation hook
-  const [sendTDEEData] = useMutation(SEND_TDEE_DATA);
+  const presentation = useSelector((state: ReduxState) => state.user.presentation);
 
-  const handleSubmit = async () => {
-    try {
-      // Send data to the Suggestic API
-      const response = await sendTDEEData({
-        variables: {
-          age: parseInt(formData.age),
-          heightFeet: parseInt(formData.heightFeet),
-          heightInches: parseInt(formData.heightInches),
-          weight: parseInt(formData.weight),
-          activityLevel: formData.activityLevel,
-        },
-      });
-
-      // Handle the response or errors
-      if (response.data) {
-        // Navigate to the next screen or handle the response as needed
-        navigation.navigate('FitnessGoalSelection');
-      }
-    } catch (error) {
-      console.error('Error sending TDEE data:', error);
+  const dispatch = useDispatch();
+  
+  const calculateTDEE = (presentation: 'masculine' | 'feminine' | 'non-binary') => {
+    let BMR = 0;
+    switch (presentation) {
+      case 'masculine':
+        BMR = 66.5 + ( 13.75 * parseInt(formData.weight) ) + ( 5.003 * (parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)) ) - ( 6.75 * parseInt(formData.age) );
+        break;
+      case 'feminine':
+        BMR = 655.1 + ( 9.563 * parseInt(formData.weight) ) + ( 1.850 * (parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)) ) - ( 4.676 * parseInt(formData.age) );
+        break;
+      case 'non-binary':
+        // Average of masculine and feminine
+        const masculineBMR = 66.5 + ( 13.75 * parseInt(formData.weight) ) + ( 5.003 * (parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)) ) - ( 6.75 * parseInt(formData.age) );
+        const feminineBMR = 655.1 + ( 9.563 * parseInt(formData.weight) ) + ( 1.850 * (parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)) ) - ( 4.676 * parseInt(formData.age) );
+        BMR = (masculineBMR + feminineBMR) / 2;
+        break;
     }
-  };
+
+    let multiplier = 1.2; // Default for sedentary
+    switch (formData.activityLevel) {
+      case 'light':
+        multiplier = 1.375;
+        break;
+      case 'moderate':
+        multiplier = 1.55;
+        break;
+      case 'intense':
+        multiplier = 1.725;
+        break;
+    }
+    return BMR * multiplier;
+};
+
+  const handleSubmit = () => {
+  const tdee = calculateTDEE(presentation);
+  dispatch(setMaintenanceCalories(tdee)); 
+  navigation.navigate('FitnessGoalSelection');
+};
 
   return (
     <View style={styles.container}>

@@ -7,7 +7,7 @@ type RootStackParamList = {
   TDEEScreen: undefined;
   DietaryPreferencesAllergies: undefined;
   WorkoutSettings: undefined;
-  // Add other screens here...
+  FitnessGoalSelection: undefined;
 };
 
 type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
@@ -45,6 +45,7 @@ const HomePage: React.FC<{ navigation: HomeNavigationProp }> = ({ navigation }) 
       <Button title="Update TDEE Information" onPress={() => navigation.navigate('TDEEScreen')} />
       <Button title="Update Dietary Preferences" onPress={() => navigation.navigate('DietaryPreferencesAllergies')} />
       <Button title="Update Workout Settings" onPress={() => navigation.navigate('WorkoutSettings')} />
+      <Button title="Update Fitness Goals" onPress={() => navigation.navigate('FitnessGoalSelection')} />
       {/* Add more navigation buttons as needed */}
     </View>
   );

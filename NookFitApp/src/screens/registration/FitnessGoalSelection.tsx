@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import Slider from '@react-native-community/slider';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type RootStackParamList = {
@@ -7,9 +9,11 @@ type RootStackParamList = {
   TDEEScreen: undefined;
   FitnessGoalSelection: undefined;
   WorkoutSettings: undefined;
+  HomePage: undefined;
+  DietaryPreferencesAllergies: undefined;
 };
 
-type FitnessGoalNavigationProp = StackNavigationProp<RootStackParamList, 'FitnessGoalSelection'>;
+type FitnessGoalNavigationProp = StackNavigationProp<RootStackParamList, 'DietaryPreferencesAllergies'>;
 
 const goals = [
   'Weight Loss',
@@ -21,33 +25,51 @@ const goals = [
 ];
 
 const FitnessGoalSelection = ({ navigation }: { navigation: FitnessGoalNavigationProp }) => {
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [selectedGoal, setSelectedGoal] = useState<string | undefined>(undefined);
+  const [caloricAdjustment, setCaloricAdjustment] = useState<number>(0); // Default value
 
-  const toggleGoal = (goal: string) => {
-    if (selectedGoals.includes(goal)) {
-      setSelectedGoals(prevGoals => prevGoals.filter(g => g !== goal));
-    } else {
-      setSelectedGoals(prevGoals => [...prevGoals, goal]);
+  const handleGoalChange = (goal: string) => {
+    setSelectedGoal(goal);
+    switch (goal) {
+      case 'Weight Loss':
+        setCaloricAdjustment(-500); // Default deficit for weight loss
+        break;
+      case 'Muscle Gain':
+        setCaloricAdjustment(500); // Default surplus for muscle gain
+        break;
+      default:
+        setCaloricAdjustment(0); // Maintenance
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Select Your Fitness Goals</Text>
-      {goals.map(goal => (
-        <TouchableOpacity
-          key={goal}
-          style={styles.goalItem}
-          onPress={() => toggleGoal(goal)}
-        >
-          <Text style={styles.goalText}>{goal}</Text>
-          {selectedGoals.includes(goal) && <Text style={styles.checkmark}>✔</Text>}
-        </TouchableOpacity>
-      ))}
+      <Text style={styles.title}>Select Your Fitness Goal</Text>
+      <Text style={styles.instruction}>Let's work on one goal at a time. You can always update this once you're ready to move on to the next goal.</Text>
+      
+      <Picker
+        selectedValue={selectedGoal}
+        onValueChange={(itemValue: string) => handleGoalChange(itemValue)}>
+        {goals.map(goal => (
+          <Picker.Item key={goal} label={goal} value={goal} />
+        ))}
+      </Picker>
+
+      <Text style={styles.sliderLabel}>Adjust Caloric Intake:</Text>
+      <Slider
+        value={caloricAdjustment}
+        onValueChange={value => setCaloricAdjustment(value)}
+        minimumValue={-1000}
+        maximumValue={1000}
+        step={50}
+      />
+      <Text style={styles.sliderValue}>{caloricAdjustment > 0 ? `+${caloricAdjustment}` : caloricAdjustment} Calories</Text>
+
       <Button 
         title="NEXT" 
-        onPress={() => navigation.navigate('WorkoutSettings')} 
+        onPress={() => navigation.navigate('DietaryPreferencesAllergies')} 
       />
+      <Button title="Go to Home" onPress={() => navigation.navigate('HomePage')} />
     </View>
   );
 };
@@ -61,23 +83,22 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  goalItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
     marginBottom: 10,
   },
-  goalText: {
-    fontSize: 18,
+  instruction: {
+    fontSize: 16,
+    marginBottom: 20,
   },
-  checkmark: {
+  sliderLabel: {
     fontSize: 18,
-    color: 'green',
+    fontWeight: '600',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  sliderValue: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });
 
