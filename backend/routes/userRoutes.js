@@ -88,7 +88,7 @@ router.post('/login', async (req, res, next) => {
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(200).json({ token });
+        res.status(200).json({ token, userId: user._id });
     } catch (error) {
         console.error('Login Error:', error.message);
         console.error('Stack Trace:', error.stack);
@@ -122,9 +122,9 @@ router.put('/profile/:userId', authenticateJWT, async (req, res, next) => {
     try {
         const usersCollection = getUsersCollection(req);
         const userId = req.params.userId;
-        const { username, email, age, height, weight } = req.body;
+        const { username, email, age, height, weight, tdee } = req.body;
 
-        const result = await usersCollection.updateOne({ _id: ObjectId(userId) }, { $set: { username, email, age, height, weight } });
+        const result = await usersCollection.updateOne({ _id: ObjectId(userId) }, { $set: { username, email, age, height, weight, tdee } });
 
         if (result.modifiedCount === 0) {
             return res.status(400).json({ message: PROFILE_UPDATE_FAILED_ERROR });

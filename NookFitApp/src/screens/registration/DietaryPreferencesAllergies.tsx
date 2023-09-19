@@ -7,6 +7,7 @@ import { setMacronutrients } from '../../reducers/userReducer';
 
 type RootStackParamList = {
   UserRegistration: undefined;
+  HomePage: undefined;
   TDEEScreen: undefined;
   FitnessGoalSelection: undefined;
   WorkoutSettings: undefined;
@@ -102,6 +103,7 @@ const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPrefer
         title="NEXT" 
         onPress={handleNext} 
       />
+      <Button title="Go to Home" onPress={() => navigation.navigate('HomePage')} />
     </View>
   );
 };

@@ -1,26 +1,38 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 type RootStackParamList = {
-  HomePage: undefined;
-  TDEEScreen: undefined;
-  DietaryPreferencesAllergies: undefined;
-  WorkoutSettings: undefined;
-  FitnessGoalSelection: undefined;
+  HomePage: { userId: string };
+  TDEEScreen: { userId: string };
+  DietaryPreferencesAllergies: { userId: string };
+  WorkoutSettings: { userId: string };
+  FitnessGoalSelection: { userId: string };
 };
 
 type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
 
-const HomePage: React.FC<{ navigation: HomeNavigationProp }> = ({ navigation }) => {
+const HomePage: React.FC<{ navigation: HomeNavigationProp, route: RouteProp<RootStackParamList, 'HomePage'> }> = ({ navigation, route }) => {
+  // Access user data from the Redux store
+  const { maintenanceCalories, caloricTarget, macronutrients } = useSelector((state: RootState) => state.user);
+
+  const userId = route.params?.userId;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Nook Fitness Dashboard</Text>
 
       {/* Available Calories and Macronutrients */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>🍎 Available Calories and Macronutrients</Text>
-        {/* Display the available calories and macronutrients here */}
+        {maintenanceCalories !== null && <Text>Maintenance Calories: {maintenanceCalories} kcal</Text>}
+        {caloricTarget !== null && <Text>Caloric Adjustment: {caloricTarget} kcal</Text>}
+        {maintenanceCalories !== null && caloricTarget !== null && (
+        <Text>Total Available Calories for the Day: {maintenanceCalories + caloricTarget} kcal</Text>
+        )}
+        {macronutrients !== null && <Text>Macronutrients: {JSON.stringify(macronutrients)}</Text>}
       </View>
 
       {/* Tasks on the User's To-Do List */}
@@ -42,11 +54,10 @@ const HomePage: React.FC<{ navigation: HomeNavigationProp }> = ({ navigation }) 
       </View>
 
       {/* Navigation to Other Profile Features */}
-      <Button title="Update TDEE Information" onPress={() => navigation.navigate('TDEEScreen')} />
-      <Button title="Update Dietary Preferences" onPress={() => navigation.navigate('DietaryPreferencesAllergies')} />
-      <Button title="Update Workout Settings" onPress={() => navigation.navigate('WorkoutSettings')} />
-      <Button title="Update Fitness Goals" onPress={() => navigation.navigate('FitnessGoalSelection')} />
-      {/* Add more navigation buttons as needed */}
+      <Button title="Update TDEE Information" onPress={() => navigation.navigate('TDEEScreen', { userId })} />
+      <Button title="Update Fitness Goals" onPress={() => navigation.navigate('FitnessGoalSelection', { userId })} />
+      <Button title="Update Dietary Preferences" onPress={() => navigation.navigate('DietaryPreferencesAllergies', { userId })} />
+      <Button title="Update Workout Settings" onPress={() => navigation.navigate('WorkoutSettings', { userId })} />
     </View>
   );
 };

@@ -4,6 +4,8 @@ import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMaintenanceCalories } from '../../reducers/userReducer';
+import { RootState } from '../../store'; 
+import * as userAPI from '../../api/userAPI'; 
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -17,6 +19,7 @@ type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
 type ReduxState = {
   user: {
     presentation: 'masculine' | 'feminine' | 'non-binary';
+    id: string | null;
   };
 };
 
@@ -30,6 +33,7 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
   });
 
   const presentation = useSelector((state: ReduxState) => state.user.presentation);
+  const userId = useSelector((state: ReduxState) => state.user.id);
 
   const dispatch = useDispatch();
   
@@ -65,9 +69,29 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
     return BMR * multiplier;
 };
 
-  const handleSubmit = () => {
+const handleSubmit = async () => {
   const tdee = calculateTDEE(presentation);
-  dispatch(setMaintenanceCalories(tdee)); 
+  dispatch(setMaintenanceCalories(tdee));
+
+  if (!userId) {
+    console.error("User ID is not available.");
+    // Handle the error, maybe show a message to the user
+    return;
+  }
+
+  try {
+    // Send the TDEE data to the backend
+    await userAPI.updateUserTDEE(userId, {
+      tdee,
+      age: formData.age,
+      height: (parseInt(formData.heightFeet) * 12) + parseInt(formData.heightInches),
+      weight: formData.weight
+    });
+  } catch (error) {
+    console.error("Failed to update TDEE in backend:", error);
+    // Handle the error, maybe show a message to the user
+  }
+
   navigation.navigate('FitnessGoalSelection');
 };
 

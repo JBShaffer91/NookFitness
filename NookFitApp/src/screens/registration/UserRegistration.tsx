@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useDispatch } from 'react-redux';
-import { setUserProfile } from '../../reducers/userReducer';
+import { setUserProfile, setId } from '../../reducers/userReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { registerUser } from '../../api/userAPI';
 import { BACKEND_URL } from '@env';
 
 type RootStackParamList = {
-  UserRegistration: undefined;
-  HomePage: undefined;
+  UserRegistration: { userId: string };
+  HomePage: { userId: string };
 };
 
 type UserRegistrationScreenNavigationProp = StackNavigationProp<
@@ -71,8 +71,11 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
     try {
       const signInResponse = await signInUser(formData);
       if (signInResponse.token) {
+        // Dispatch user profile data to Redux store
         dispatch(setUserProfile(formData));
-        navigation.navigate('HomePage');
+        dispatch(setId(signInResponse.userId));
+  
+        navigation.navigate('HomePage', { userId: signInResponse.userId });
       } else {
         Alert.alert('Sign In Message', signInResponse.message || 'Unknown error occurred.');
       }
@@ -80,7 +83,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       console.error("Error:", error.message || "An unknown error occurred");
       Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
     }
-  };
+  };  
 
   const handleSubmit = async () => {
     try {
@@ -92,7 +95,10 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
         Alert.alert('Registration Message', response.message);
       } else {
         dispatch(setUserProfile(formData));
-        navigation.navigate('HomePage');
+        if (response.id) {
+          dispatch(setId(response.id));
+        }
+        navigation.navigate('HomePage', { userId: response.id });
       }
     } catch (error: any) {
       console.error("Error:", error.message || "An unknown error occurred");
