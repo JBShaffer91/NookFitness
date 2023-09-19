@@ -4,6 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 type RootStackParamList = {
   HomePage: { userId: string };
@@ -15,7 +16,9 @@ type RootStackParamList = {
 
 type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
 
-const HomePage: React.FC<{ navigation: HomeNavigationProp, route: RouteProp<RootStackParamList, 'HomePage'> }> = ({ navigation, route }) => {
+const HomePage: React.FC = () => {
+  const navigation = useNavigation<HomeNavigationProp>();
+  const route = useRoute<RouteProp<RootStackParamList, 'HomePage'>>();
   // Access user data from the Redux store
   const { maintenanceCalories, caloricTarget, macronutrients } = useSelector((state: RootState) => state.user);
 
