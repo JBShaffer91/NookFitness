@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useDispatch } from 'react-redux';
-import { setUserProfile, setId } from '../../reducers/userReducer';
+import { setUserProfile, setEmail } from '../../reducers/userReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { registerUser } from '../../api/userAPI';
 import { BACKEND_URL } from '@env';
@@ -73,7 +73,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       if (signInResponse.token) {
         // Dispatch user profile data to Redux store
         dispatch(setUserProfile(formData));
-        dispatch(setId(signInResponse.userId));
+        dispatch(setEmail(signInResponse.userId));
   
         navigation.navigate('HomePage', { userId: signInResponse.userId });
       } else {
@@ -96,7 +96,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       } else {
         dispatch(setUserProfile(formData));
         if (response.id) {
-          dispatch(setId(response.id));
+          dispatch(setEmail(response.id));
         }
         navigation.navigate('HomePage', { userId: response.id });
       }

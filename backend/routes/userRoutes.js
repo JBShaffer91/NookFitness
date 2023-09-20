@@ -42,12 +42,12 @@ router.post('/register', [
     check('username').notEmpty(),
     check('presentation').notEmpty()
 ], async (req, res, next) => {
-    console.log("Registration Request Body:", req.body); // Added logging for request body
+    console.log("Registration Request Body:", req.body);
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        console.log("Validation Errors:", errors.array()); // Added logging for validation errors
-        return res.status(400).json({ message: errors.array().map(err => err.msg).join(', ') }); // Return all validation errors
+        console.log("Validation Errors:", errors.array());
+        return res.status(400).json({ message: errors.array().map(err => err.msg).join(', ') });
     }
 
     try {
@@ -87,8 +87,8 @@ router.post('/login', async (req, res, next) => {
             return res.status(400).json({ message: INVALID_CREDENTIALS_ERROR });
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(200).json({ token, userId: user._id });
+        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ token, email: user.email });
     } catch (error) {
         console.error('Login Error:', error.message);
         console.error('Stack Trace:', error.stack);
@@ -97,18 +97,18 @@ router.post('/login', async (req, res, next) => {
 });
 
 // Fetch User Profile with authentication middleware
-router.get('/profile/:userId', authenticateJWT, async (req, res, next) => {
+router.get('/profile/:email', authenticateJWT, async (req, res, next) => {
     try {
         const usersCollection = getUsersCollection(req);
-        const userId = req.params.userId;
+        const userEmail = decodeURIComponent(req.params.email);
 
-        const user = await usersCollection.findOne({ _id: ObjectId(userId) });
+        const user = await usersCollection.findOne({ email: userEmail });
 
         if (!user) {
-            return res.status(404).json({ message: errors.array().map(err => err.msg).join(', ') });
+            return res.status(404).json({ message: USER_NOT_FOUND_ERROR });
         }
 
-        delete user.password; // Remove password before sending
+        delete user.password;
         res.status(200).json(user);
     } catch (error) {
         console.error('Fetch Profile Error:', error.message);
@@ -118,13 +118,13 @@ router.get('/profile/:userId', authenticateJWT, async (req, res, next) => {
 });
 
 // Update User Profile
-router.put('/profile/:userId', authenticateJWT, async (req, res, next) => {
+router.put('/profile/:email', authenticateJWT, async (req, res, next) => {
     try {
         const usersCollection = getUsersCollection(req);
-        const userId = req.params.userId;
-        const { username, email, age, height, weight, tdee } = req.body;
+        const userEmail = decodeURIComponent(req.params.email);
+        const { username, age, height, weight, tdee } = req.body;
 
-        const result = await usersCollection.updateOne({ _id: ObjectId(userId) }, { $set: { username, email, age, height, weight, tdee } });
+        const result = await usersCollection.updateOne({ email: userEmail }, { $set: { username, age, height, weight, tdee } });
 
         if (result.modifiedCount === 0) {
             return res.status(400).json({ message: PROFILE_UPDATE_FAILED_ERROR });
@@ -139,12 +139,12 @@ router.put('/profile/:userId', authenticateJWT, async (req, res, next) => {
 });
 
 // Delete User Profile
-router.delete('/profile/:userId', authenticateJWT, async (req, res, next) => {
+router.delete('/profile/:email', authenticateJWT, async (req, res, next) => {
     try {
         const usersCollection = getUsersCollection(req);
-        const userId = req.params.userId;
+        const userEmail = decodeURIComponent(req.params.email);
 
-        const result = await usersCollection.deleteOne({ _id: ObjectId(userId) });
+        const result = await usersCollection.deleteOne({ email: userEmail });
 
         if (result.deletedCount === 0) {
             return res.status(400).json({ message: PROFILE_DELETE_FAILED_ERROR });
