@@ -10,27 +10,26 @@ export const registerUser = async (userData: any) => {
       body: JSON.stringify(userData),
     });
 
-    // Check if the content type is JSON before parsing
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.indexOf("application/json") !== -1) {
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'An error occurred during registration.');
-      }
-      return data;
-    } else {
-      // If not JSON, just get the text response
+    if (!response.ok) {
       const text = await response.text();
       throw new Error(text || 'An error occurred during registration.');
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      return await response.json();
+    } else {
+      throw new Error('Received non-JSON response during registration.');
     }
   } catch (error) {
     throw error;
   }
 };
 
-export const updateUserTDEE = async (userId: string, tdeeData: any) => {
+export const updateUserTDEE = async (userEmail: string, tdeeData: any) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/users/profile/${userId}`, {
+    const encodedEmail = encodeURIComponent(userEmail);
+    const response = await fetch(`${BACKEND_URL}/api/users/profile/${encodedEmail}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -38,16 +37,16 @@ export const updateUserTDEE = async (userId: string, tdeeData: any) => {
       body: JSON.stringify(tdeeData),
     });
 
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.indexOf("application/json") !== -1) {
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'An error occurred during TDEE update.');
-      }
-      return data;
-    } else {
+    if (!response.ok) {
       const text = await response.text();
       throw new Error(text || 'An error occurred during TDEE update.');
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      return await response.json();
+    } else {
+      throw new Error('Received non-JSON response during TDEE update.');
     }
   } catch (error) {
     throw error;

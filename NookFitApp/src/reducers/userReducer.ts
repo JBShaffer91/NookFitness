@@ -10,6 +10,8 @@ const initialState = {
   caloricTarget: null,
   presentation: null,
   macronutrients: null,
+  tdeeError: null,
+  tdee: null,
 };
 
 const userSlice = createSlice({
@@ -19,7 +21,6 @@ const userSlice = createSlice({
     setEmail: (state, action) => { 
       state.email = action.payload;
     },
-
     setUserProfile: (state, action) => {
       state.profile = action.payload;
     },
@@ -37,7 +38,13 @@ const userSlice = createSlice({
     },
     setMacronutrients: (state, action) => {
       state.macronutrients = action.payload;
-    }
+    },
+    setTDEEError: (state, action) => {
+      state.tdeeError = action.payload;
+    },
+    setTDEE: (state, action) => {
+      state.tdee = action.payload;
+    },
   },
 });
 
@@ -49,6 +56,8 @@ export const {
   setCaloricTarget,
   setPresentation,
   setMacronutrients,
+  setTDEEError,
+  setTDEE,
 } = userSlice.actions;
 
 export default userSlice.reducer;

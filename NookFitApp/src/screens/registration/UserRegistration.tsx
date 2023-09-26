@@ -86,9 +86,18 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
   };  
 
   const handleSubmit = async () => {
+    // Check if the presentation field is not empty
+    if (formData.presentation === '') {
+      Alert.alert('Error', 'Please select a presentation.');
+      return;
+    }
+  
     try {
+      // Log formData to debug the values being sent
+      console.log('Submitting Form Data:', formData);
+  
       const response = await registerUser(formData);
-      
+  
       if (response.message === 'User already exists.') {
         handleSignIn();
       } else if (response.message) {
@@ -102,7 +111,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       }
     } catch (error: any) {
       console.error("Error:", error.message || "An unknown error occurred");
-      Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
+      Alert.alert('Error', error.message || 'Unable to process. Please check your connection and try again.');
     }
   };
 
@@ -149,16 +158,17 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
             secureTextEntry={true}
             style={styles.input}
           />
-          <Text style={styles.subTitle}>How do you present?</Text>
-          <Picker
+            <Text style={styles.subTitle}>How do you present?</Text>
+            <Picker
             selectedValue={formData.presentation}
             onValueChange={(itemValue: string) =>
               setFormData({ ...formData, presentation: itemValue })
             }>
-            <Picker.Item label="Masculine" value="masculine" />
-            <Picker.Item label="Feminine" value="feminine" />
-            <Picker.Item label="Non-Binary" value="non-binary" />
-          </Picker>
+              <Picker.Item label="Select One" value="" />
+              <Picker.Item label="Masculine" value="masculine" />
+              <Picker.Item label="Feminine" value="feminine" />
+              <Picker.Item label="Non-Binary" value="non-binary" />
+            </Picker>
           <Button title="Next" onPress={handleSubmit} />
           <Text style={{ textAlign: 'center', marginTop: 10 }} onPress={() => setIsSignIn(true)}>Already a user? Sign In</Text>
         </>

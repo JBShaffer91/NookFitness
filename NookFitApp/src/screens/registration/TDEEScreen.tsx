@@ -20,6 +20,7 @@ type ReduxState = {
   user: {
     presentation: 'masculine' | 'feminine' | 'non-binary';
     id: string | null;
+    email: string | null; // Added email property
   };
 };
 
@@ -33,7 +34,7 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
   });
 
   const presentation = useSelector((state: ReduxState) => state.user.presentation);
-  const userId = useSelector((state: ReduxState) => state.user.id);
+  const userEmail = useSelector((state: ReduxState) => state.user.email);
 
   const dispatch = useDispatch();
   
@@ -67,33 +68,33 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
         break;
     }
     return BMR * multiplier;
-};
+  };
 
-const handleSubmit = async () => {
-  const tdee = calculateTDEE(presentation);
-  dispatch(setMaintenanceCalories(tdee));
+  const handleSubmit = async () => {
+    const tdee = calculateTDEE(presentation);
+    dispatch(setMaintenanceCalories(tdee));
 
-  if (!userId) {
-    console.error("User ID is not available.");
-    // Handle the error, maybe show a message to the user
-    return;
-  }
+    if (!userEmail) {
+      console.error("User email is not available.");
+      // Handle the error, maybe show a message to the user
+      return;
+    }
 
-  try {
-    // Send the TDEE data to the backend
-    await userAPI.updateUserTDEE(userId, {
-      tdee,
-      age: formData.age,
-      height: (parseInt(formData.heightFeet) * 12) + parseInt(formData.heightInches),
-      weight: formData.weight
-    });
-  } catch (error) {
-    console.error("Failed to update TDEE in backend:", error);
-    // Handle the error, maybe show a message to the user
-  }
+    try {
+      // Send the TDEE data to the backend
+      await userAPI.updateUserTDEE(userEmail, {
+        tdee,
+        age: formData.age,
+        height: (parseInt(formData.heightFeet) * 12) + parseInt(formData.heightInches),
+        weight: formData.weight
+      });
+    } catch (error) {
+      console.error("Failed to update TDEE in backend:", error);
+      // Handle the error, maybe show a message to the user
+    }
 
-  navigation.navigate('FitnessGoalSelection');
-};
+    navigation.navigate('FitnessGoalSelection');
+  };
 
   return (
     <View style={styles.container}>

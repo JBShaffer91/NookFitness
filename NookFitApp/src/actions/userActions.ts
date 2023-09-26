@@ -7,15 +7,41 @@ import {
   setCaloricTarget,
   setPresentation,
   setMacronutrients,
+  setTDEEError,
+  setTDEE,
 } from '../reducers/userReducer';
+import { updateUserTDEE } from '../api/userAPI'; // Ensure this import is correct
 
-// Example thunk for fetching TDEE
+// Thunk for fetching TDEE
 export const fetchTDEE = (email: string) => async (dispatch: AppDispatch) => {
   try {
     const response = await fetch(`/api/users/tdee?email=${email}`);
+    if (!response.ok) throw new Error('Failed to fetch TDEE');
     const data = await response.json();
     dispatch(setMaintenanceCalories(data.tdee));
   } catch (error) {
     console.error('Failed to fetch TDEE:', error);
+    if (error instanceof Error) {
+      dispatch(setTDEEError(error.message));
+    } else {
+      dispatch(setTDEEError('An unknown error occurred'));
+    }
+  }
+};
+
+// Action creator for updating TDEE
+export const updateTDEE = (userEmail: string, tdeeData: any) => async (dispatch: AppDispatch) => {
+  try {
+    const response = await updateUserTDEE(userEmail, tdeeData);
+    if (!response.ok) throw new Error('Failed to update TDEE');
+    const data = await response.json();
+    dispatch(setTDEE(data.tdee));
+  } catch (error) {
+    console.error('Failed to update TDEE:', error);
+    if (error instanceof Error) {
+      dispatch(setTDEEError(error.message));
+    } else {
+      dispatch(setTDEEError('An unknown error occurred'));
+    }
   }
 };
