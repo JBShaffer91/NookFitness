@@ -8,7 +8,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 type RootStackParamList = {
   HomePage: { userId: string };
-  TDEEScreen: { userId: string };
+  TDEEScreen: { userId: string; userEmail: string | null; presentation: string | null };
   DietaryPreferencesAllergies: { userId: string };
   WorkoutSettings: { userId: string };
   FitnessGoalSelection: { userId: string };
@@ -19,8 +19,9 @@ type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
 const HomePage: React.FC = () => {
   const navigation = useNavigation<HomeNavigationProp>();
   const route = useRoute<RouteProp<RootStackParamList, 'HomePage'>>();
-  // Access user data from the Redux store
-  const { maintenanceCalories, caloricTarget, macronutrients } = useSelector((state: RootState) => state.user);
+  
+  // Access user data from the Redux store including userEmail
+  const { maintenanceCalories, caloricTarget, macronutrients, email: userEmail, presentation } = useSelector((state: RootState) => state.user);
 
   const userId = route.params?.userId;
 
@@ -57,7 +58,7 @@ const HomePage: React.FC = () => {
       </View>
 
       {/* Navigation to Other Profile Features */}
-      <Button title="Update TDEE Information" onPress={() => navigation.navigate('TDEEScreen', { userId })} />
+      <Button title="Update TDEE Information" onPress={() => navigation.navigate('TDEEScreen', { userId, userEmail, presentation })} />
       <Button title="Update Fitness Goals" onPress={() => navigation.navigate('FitnessGoalSelection', { userId })} />
       <Button title="Update Dietary Preferences" onPress={() => navigation.navigate('DietaryPreferencesAllergies', { userId })} />
       <Button title="Update Workout Settings" onPress={() => navigation.navigate('WorkoutSettings', { userId })} />

@@ -73,7 +73,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       if (signInResponse.token) {
         // Dispatch user profile data to Redux store
         dispatch(setUserProfile(formData));
-        dispatch(setEmail(signInResponse.userId));
+        dispatch(setEmail(signInResponse.userEmail));
   
         navigation.navigate('HomePage', { userId: signInResponse.userId });
       } else {
@@ -81,6 +81,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       }
     } catch (error: any) {
       console.error("Error:", error.message || "An unknown error occurred");
+      console.log('Dispatched Email:', formData.email);
       Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
     }
   };  
@@ -105,12 +106,13 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       } else {
         dispatch(setUserProfile(formData));
         if (response.id) {
-          dispatch(setEmail(response.id));
+          dispatch(setEmail(response.email));
         }
         navigation.navigate('HomePage', { userId: response.id });
       }
     } catch (error: any) {
       console.error("Error:", error.message || "An unknown error occurred");
+      console.log('Dispatched Email:', formData.email);
       Alert.alert('Error', error.message || 'Unable to process. Please check your connection and try again.');
     }
   };

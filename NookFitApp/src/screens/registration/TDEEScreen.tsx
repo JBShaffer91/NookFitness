@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMaintenanceCalories } from '../../reducers/userReducer';
 import { RootState } from '../../store'; 
@@ -9,22 +10,24 @@ import * as userAPI from '../../api/userAPI';
 
 type RootStackParamList = {
   UserRegistration: undefined;
-  TDEEScreen: undefined;
+  TDEEScreen: { userEmail: string | null; presentation: string | null };
   FitnessGoalSelection: undefined;
   HomePage: undefined; 
 };
 
 type TDEENavigationProp = StackNavigationProp<RootStackParamList, 'TDEEScreen'>;
+type TDEERouteProp = RouteProp<RootStackParamList, 'TDEEScreen'>; 
 
-type ReduxState = {
-  user: {
-    presentation: 'masculine' | 'feminine' | 'non-binary';
-    id: string | null;
-    email: string | null; // Added email property
-  };
+type TDEEScreenProps = {
+  navigation: TDEENavigationProp;
+  route: TDEERouteProp;
 };
 
-const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
+const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) => {
+  if (!navigation || !route) {
+    return null;
+  }
+  
   const [formData, setFormData] = useState({
     age: '',
     heightFeet: '',
@@ -33,8 +36,13 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
     activityLevel: '',
   });
 
-  const presentation = useSelector((state: ReduxState) => state.user.presentation);
-  const userEmail = useSelector((state: ReduxState) => state.user.email);
+  const presentation = useSelector((state: RootState) => state.user.presentation);
+  const userEmail = route.params?.userEmail;
+
+  if (!presentation) {
+    console.error("Presentation is not available.");
+    return null; 
+  }  
 
   const dispatch = useDispatch();
   
@@ -71,15 +79,21 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
   };
 
   const handleSubmit = async () => {
-    const tdee = calculateTDEE(presentation);
-    dispatch(setMaintenanceCalories(tdee));
-
-    if (!userEmail) {
-      console.error("User email is not available.");
-      // Handle the error, maybe show a message to the user
+    if (!presentation) {
+      console.error("Presentation is not available.");
+      // You might want to show an error message to the user here
       return;
     }
-
+  
+    const tdee = calculateTDEE(presentation);
+    dispatch(setMaintenanceCalories(tdee));
+  
+    if (!userEmail) {
+      console.error("User email is not available.");
+      console.log("Retrieved userEmail from store:", userEmail);
+      return;
+    }
+  
     try {
       // Send the TDEE data to the backend
       await userAPI.updateUserTDEE(userEmail, {
@@ -92,9 +106,9 @@ const TDEEScreen = ({ navigation }: { navigation: TDEENavigationProp }) => {
       console.error("Failed to update TDEE in backend:", error);
       // Handle the error, maybe show a message to the user
     }
-
+  
     navigation.navigate('FitnessGoalSelection');
-  };
+  };  
 
   return (
     <View style={styles.container}>

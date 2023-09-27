@@ -10,7 +10,20 @@ import {
   setTDEEError,
   setTDEE,
 } from '../reducers/userReducer';
-import { updateUserTDEE } from '../api/userAPI'; // Ensure this import is correct
+import { updateUserTDEE } from '../api/userAPI';
+
+// Thunk for fetching Presentation
+export const fetchPresentation = (userId: string) => async (dispatch: AppDispatch) => {
+  try {
+    const response = await fetch(`/api/users/${userId}/presentation`); 
+    if (!response.ok) throw new Error('Failed to fetch Presentation');
+    const data = await response.json();
+    dispatch(setPresentation(data.presentation));
+  } catch (error) {
+    console.error('Failed to fetch Presentation:', error);
+    // Handle the error appropriately
+  }
+};
 
 // Thunk for fetching TDEE
 export const fetchTDEE = (email: string) => async (dispatch: AppDispatch) => {
