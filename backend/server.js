@@ -3,12 +3,11 @@ const axios = require('axios');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const mongoose = require('mongoose'); // Added this line for Mongoose
+const mongoose = require('mongoose');
 const userRoutes = require('./routes/userRoutes');
 const foodRoutes = require('./routes/foodRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
 const progressRoutes = require('./routes/progressRoutes');
-const { Suggestic } = require('@suggestic/sdk');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,21 +37,6 @@ app.use('/api/users/:userId/progress', progressRoutes);
 
 app.get('/', (req, res) => {
   res.send('Nook Fitness API is running!');
-});
-
-// Suggestic API setup
-const SUGGESTIC_API_KEY = process.env.SUGGESTIC_API_KEY;
-const suggesticClient = new Suggestic(SUGGESTIC_API_KEY);
-
-app.get('/api/suggestic/mealplan', async (req, res) => {
-  try {
-    const user = suggesticClient.getUser(process.env.SUGGESTIC_USER_ID);
-    const mealplan = await user.mealPlan();
-    res.json(mealplan);
-  } catch (error) {
-    console.error('Error fetching data from Suggestic API:', error);
-    res.status(500).send('Error fetching data from Suggestic API.');
-  }
 });
 
 // ExerciseAPI3 Route

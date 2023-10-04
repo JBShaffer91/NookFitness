@@ -1,16 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
+import thunk from 'redux-thunk';
 import userReducer from '../reducers/userReducer';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      thunk: true,
-      immutableCheck: true,
-      serializableCheck: true,
-    }),
+  middleware: (getDefaultMiddleware) => 
+    getDefaultMiddleware().prepend(thunk),
   devTools: process.env.NODE_ENV !== 'production',
 });
 

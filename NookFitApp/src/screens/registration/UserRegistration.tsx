@@ -8,8 +8,12 @@ import { registerUser } from '../../api/userAPI';
 import { BACKEND_URL } from '@env';
 
 type RootStackParamList = {
-  UserRegistration: { userId: string };
-  HomePage: { userId: string };
+  UserRegistration: undefined;
+  HomePage: { userId: string; userEmail?: string; presentation?: string };
+  TDEEScreen: { userId: string; userEmail: string | null; presentation: string | null };
+  DietaryPreferencesAllergies: { userId: string };
+  WorkoutSettings: { userId: string };
+  FitnessGoalSelection: { userId: string };
 };
 
 type UserRegistrationScreenNavigationProp = StackNavigationProp<
@@ -55,6 +59,7 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
       });
 
       const responseData = await response.json();
+      console.log("SignIn Response Data:", responseData);
 
       if (!response.ok) {
         throw new Error(responseData.message || 'Failed to sign in.');
@@ -69,22 +74,26 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
 
   const handleSignIn = async () => {
     try {
-      const signInResponse = await signInUser(formData);
-      if (signInResponse.token) {
-        // Dispatch user profile data to Redux store
-        dispatch(setUserProfile(formData));
-        dispatch(setEmail(signInResponse.userEmail));
-  
-        navigation.navigate('HomePage', { userId: signInResponse.userId });
-      } else {
-        Alert.alert('Sign In Message', signInResponse.message || 'Unknown error occurred.');
-      }
+        const signInResponse = await signInUser(formData);
+        if (signInResponse.token) {
+            dispatch(setUserProfile(formData));
+            dispatch(setEmail(signInResponse.email));
+
+            navigation.navigate('HomePage', { 
+              userId: signInResponse.userId,
+              userEmail: formData.email, 
+              presentation: signInResponse.presentation 
+          });
+                    
+        } else {
+            Alert.alert('Sign In Message', signInResponse.message || 'Unknown error occurred.');
+        }
     } catch (error: any) {
-      console.error("Error:", error.message || "An unknown error occurred");
-      console.log('Dispatched Email:', formData.email);
-      Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
+        console.error("Error:", error.message || "An unknown error occurred");
+        console.log('Dispatched Email:', formData.email);
+        Alert.alert('Error', 'Unable to process. Please check your connection and try again.');
     }
-  };  
+  };
 
   const handleSubmit = async () => {
     // Check if the presentation field is not empty

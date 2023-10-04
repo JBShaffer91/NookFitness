@@ -3,9 +3,6 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
-import { setMaintenanceCalories } from '../../reducers/userReducer';
-import { RootState } from '../../store'; 
 import * as userAPI from '../../api/userAPI'; 
 
 type RootStackParamList = {
@@ -36,15 +33,13 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
     activityLevel: '',
   });
 
-  const presentation = useSelector((state: RootState) => state.user.presentation);
   const userEmail = route.params?.userEmail;
+  const presentation = route.params?.presentation;
 
   if (!presentation) {
     console.error("Presentation is not available.");
     return null; 
   }  
-
-  const dispatch = useDispatch();
   
   const calculateTDEE = (presentation: 'masculine' | 'feminine' | 'non-binary') => {
     let BMR = 0;
@@ -81,16 +76,18 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
   const handleSubmit = async () => {
     if (!presentation) {
       console.error("Presentation is not available.");
-      // You might want to show an error message to the user here
       return;
     }
   
-    const tdee = calculateTDEE(presentation);
-    dispatch(setMaintenanceCalories(tdee));
+    if (!['masculine', 'feminine', 'non-binary'].includes(presentation)) {
+      console.error("Invalid presentation value:", presentation);
+      return;
+    }
+  
+    const tdee = calculateTDEE(presentation as 'masculine' | 'feminine' | 'non-binary');
   
     if (!userEmail) {
       console.error("User email is not available.");
-      console.log("Retrieved userEmail from store:", userEmail);
       return;
     }
   
@@ -108,7 +105,7 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
     }
   
     navigation.navigate('FitnessGoalSelection');
-  };  
+  };
 
   return (
     <View style={styles.container}>

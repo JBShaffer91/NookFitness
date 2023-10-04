@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { ObjectId } = require('mongodb');
 const { check, validationResult } = require('express-validator');
-
 const USER_EXISTS_ERROR = 'User already exists.';
 const USER_NOT_FOUND_ERROR = 'User not found!';
 const INVALID_CREDENTIALS_ERROR = 'Invalid credentials!';
@@ -13,9 +12,17 @@ const PROFILE_DELETE_FAILED_ERROR = 'Profile deletion failed.';
 
 // Utility function to get users collection
 const getUsersCollection = (req) => {
+    // Log when the function is called
+    console.log("getUsersCollection called");
+
     if (!req.app.locals.db) {
+        console.error("Database not initialized"); // Log an error message if the database isn't initialized
         throw new Error("Database not initialized");
     }
+
+    // Log the name of the collection being retrieved
+    console.log("Retrieving 'users' collection from the database");
+
     return req.app.locals.db.collection('users');
 };
 
@@ -25,13 +32,13 @@ const authenticateJWT = (req, res, next) => {
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
             if (err) {
-                return res.sendStatus(403);
+                return res.status(403).json({ message: 'Invalid token' });
             }
             req.user = user;
             next();
         });
     } else {
-        res.sendStatus(401);
+        res.status(401).json({ message: 'Token missing' });
     }
 };
 
@@ -76,19 +83,26 @@ router.post('/login', async (req, res, next) => {
         const { email, password } = req.body;
 
         const user = await usersCollection.findOne({ email });
+        console.log("Received Email:", email);
+        console.log("Received Password:", password);
 
         if (!user) {
-            return res.status(400).json({ message: USER_NOT_FOUND_ERROR });
+            return res.status(400).json({ message: USER_NOT_FOUND_ERROR, reason: 'User not found' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({ message: INVALID_CREDENTIALS_ERROR });
+            return res.status(400).json({ message: INVALID_CREDENTIALS_ERROR, reason: 'Incorrect password' });
         }
 
         const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(200).json({ token, email: user.email });
+        res.status(200).json({ 
+            token, 
+            email: user.email,
+            userId: user._id,  // Assuming the user's ID is stored in _id field in MongoDB
+            presentation: user.presentation  // Send the user's presentation
+        });
     } catch (error) {
         console.error('Login Error:', error.message);
         console.error('Stack Trace:', error.stack);
@@ -103,6 +117,7 @@ router.get('/profile/:email', authenticateJWT, async (req, res, next) => {
         const userEmail = decodeURIComponent(req.params.email);
 
         const user = await usersCollection.findOne({ email: userEmail });
+        console.log("Queried User:", user);
 
         if (!user) {
             return res.status(404).json({ message: USER_NOT_FOUND_ERROR });

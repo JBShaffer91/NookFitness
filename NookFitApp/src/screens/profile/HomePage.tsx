@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { BACKEND_URL } from '@env';
 
 type RootStackParamList = {
-  HomePage: { userId: string };
+  HomePage: { userId?: string; userEmail?: string; presentation?: string };
   TDEEScreen: { userId: string; userEmail: string | null; presentation: string | null };
   DietaryPreferencesAllergies: { userId: string };
   WorkoutSettings: { userId: string };
@@ -19,11 +18,30 @@ type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
 const HomePage: React.FC = () => {
   const navigation = useNavigation<HomeNavigationProp>();
   const route = useRoute<RouteProp<RootStackParamList, 'HomePage'>>();
-  
-  // Access user data from the Redux store including userEmail
-  const { maintenanceCalories, caloricTarget, macronutrients, email: userEmail, presentation } = useSelector((state: RootState) => state.user);
+
+  const [userData, setUserData] = useState({
+    maintenanceCalories: null,
+    caloricTarget: null,
+    macronutrients: null
+  });
 
   const userId = route.params?.userId;
+  const userEmail = route.params?.userEmail;
+  const presentation = route.params?.presentation;
+
+  useEffect(() => {
+    if (userEmail) {
+      // Fetch user data from the backend using email
+      fetch(`${BACKEND_URL}/api/users/profile/${encodeURIComponent(userEmail)}`)
+        .then(response => response.json())
+        .then(data => {
+          setUserData(data);
+        })
+        .catch(error => {
+          console.error("Error fetching user data:", error);
+        });
+    }
+  }, [userEmail]);
 
   return (
     <View style={styles.container}>
@@ -31,12 +49,12 @@ const HomePage: React.FC = () => {
 
       {/* Available Calories and Macronutrients */}
       <View style={styles.card}>
-        {maintenanceCalories !== null && <Text>Maintenance Calories: {maintenanceCalories} kcal</Text>}
-        {caloricTarget !== null && <Text>Caloric Adjustment: {caloricTarget} kcal</Text>}
-        {maintenanceCalories !== null && caloricTarget !== null && (
-        <Text>Total Available Calories for the Day: {maintenanceCalories + caloricTarget} kcal</Text>
+        {userData.maintenanceCalories && <Text>Maintenance Calories: {userData.maintenanceCalories} kcal</Text>}
+        {userData.caloricTarget && <Text>Caloric Adjustment: {userData.caloricTarget} kcal</Text>}
+        {userData.maintenanceCalories && userData.caloricTarget && (
+          <Text>Total Available Calories for the Day: {userData.maintenanceCalories + userData.caloricTarget} kcal</Text>
         )}
-        {macronutrients !== null && <Text>Macronutrients: {JSON.stringify(macronutrients)}</Text>}
+        {userData.macronutrients && <Text>Macronutrients: {JSON.stringify(userData.macronutrients)}</Text>}
       </View>
 
       {/* Tasks on the User's To-Do List */}
@@ -50,18 +68,32 @@ const HomePage: React.FC = () => {
         <Text style={styles.cardTitle}>💧 Water Intake</Text>
         {/* Display the water bottle icons here for users to log their intake */}
       </View>
-
       {/* Daily Food Diary Prompts */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>🍽️ Food Diary</Text>
         {/* Display prompts for users to log their meals and snacks */}
       </View>
-
       {/* Navigation to Other Profile Features */}
-      <Button title="Update TDEE Information" onPress={() => navigation.navigate('TDEEScreen', { userId, userEmail, presentation })} />
-      <Button title="Update Fitness Goals" onPress={() => navigation.navigate('FitnessGoalSelection', { userId })} />
-      <Button title="Update Dietary Preferences" onPress={() => navigation.navigate('DietaryPreferencesAllergies', { userId })} />
-      <Button title="Update Workout Settings" onPress={() => navigation.navigate('WorkoutSettings', { userId })} />
+      <Button 
+        title="Update TDEE Information" 
+        onPress={() => userId && userEmail && presentation && navigation.navigate('TDEEScreen', { userId, userEmail, presentation })} 
+        disabled={!userId || !userEmail || !presentation}
+      />
+      <Button 
+        title="Update Fitness Goals" 
+        onPress={() => userId && navigation.navigate('FitnessGoalSelection', { userId })} 
+        disabled={!userId}
+      />
+      <Button 
+        title="Update Dietary Preferences" 
+        onPress={() => userId && userEmail && navigation.navigate('DietaryPreferencesAllergies', { userId })} 
+        disabled={!userId || !userEmail}
+      />
+      <Button 
+        title="Update Workout Settings" 
+        onPress={() => userId && userEmail && navigation.navigate('WorkoutSettings', { userId })} 
+        disabled={!userId || !userEmail}
+      />
     </View>
   );
 };
