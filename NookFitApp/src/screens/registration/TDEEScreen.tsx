@@ -33,7 +33,8 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
     heightInches: '',
     weight: '',
     activityLevel: '',
-  });
+    username: '',
+});
 
   const userEmail = route.params?.userEmail;
   const presentation = route.params?.presentation;
@@ -62,7 +63,7 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
         break;
     }
 
-    let multiplier = 1.2; // Default for sedentary
+    let multiplier = 1.2;
     switch (formData.activityLevel) {
       case 'light':
         multiplier = 1.375;
@@ -105,13 +106,12 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
         tdee,
         age: formData.age,
         height: (parseInt(formData.heightFeet) * 12) + parseInt(formData.heightInches),
-        weight: formData.weight
+        weight: formData.weight,
+        username: formData.username,
       }, token);
     } catch (error) {
-      if (error instanceof Error) { // This is a type guard
+      if (error instanceof Error) {
         if (error.message === "Invalid Token") {
-          // Here, you'd typically use the refresh token to get a new access token
-          // For simplicity, I'm redirecting to the login page
           navigation.navigate('UserRegistration');
           console.error("Token has expired. Redirecting to login.");
         } else {

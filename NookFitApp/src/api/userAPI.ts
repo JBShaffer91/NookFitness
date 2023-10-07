@@ -40,7 +40,7 @@ export const updateUserTDEE = async (userEmail: string, tdeeData: any, token: st
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token  // Include the JWT token in the headers
+        'Authorization': 'Bearer ' + token  
       },
       body: JSON.stringify(tdeeData),
     });

@@ -10,10 +10,10 @@ import { selectToken } from '../../selectors/userSelector';
 type RootStackParamList = {
   UserRegistration: undefined;
   HomePage: { userId?: string; userEmail?: string; presentation?: string };
-  TDEEScreen: { userId: string; userEmail: string | null; presentation: string | null };
-  DietaryPreferencesAllergies: { userId: string };
-  WorkoutSettings: { userId: string };
-  FitnessGoalSelection: { userId: string };
+  TDEEScreen: { userId: string; userEmail: string | null; presentation: string | null; token: string | null };
+  DietaryPreferencesAllergies: { userId: string; userEmail: string; token: string | null };
+  WorkoutSettings: { userId: string; userEmail: string; token: string | null };
+  FitnessGoalSelection: { userId: string; token: string | null };
 };
 
 type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
@@ -82,22 +82,22 @@ const HomePage: React.FC = () => {
 
       <Button 
         title="Update TDEE Information" 
-        onPress={() => userId && userEmail && presentation && navigation.navigate('TDEEScreen', { userId, userEmail, presentation })} 
+        onPress={() => userId && userEmail && presentation && navigation.navigate('TDEEScreen', { userId, userEmail, presentation, token })} 
         disabled={!userId || !userEmail || !presentation}
       />
       <Button 
         title="Update Fitness Goals" 
-        onPress={() => userId && navigation.navigate('FitnessGoalSelection', { userId })} 
+        onPress={() => userId && navigation.navigate('FitnessGoalSelection', { userId, token })} 
         disabled={!userId}
       />
       <Button 
         title="Update Dietary Preferences" 
-        onPress={() => userId && userEmail && navigation.navigate('DietaryPreferencesAllergies', { userId })} 
+        onPress={() => userId && userEmail && navigation.navigate('DietaryPreferencesAllergies', { userId, userEmail, token })} 
         disabled={!userId || !userEmail}
       />
       <Button 
         title="Update Workout Settings" 
-        onPress={() => userId && userEmail && navigation.navigate('WorkoutSettings', { userId })} 
+        onPress={() => userId && userEmail && navigation.navigate('WorkoutSettings', { userId, userEmail, token })} 
         disabled={!userId || !userEmail}
       />
     </View>
