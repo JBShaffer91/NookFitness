@@ -17,7 +17,8 @@ const userSchema = new mongoose.Schema({
   dietaryPreferences: [String],
   allergies: [String],
   healthConcerns: [String],
-  injuries: [String]
+  injuries: [String],
+  refreshToken: String
 });
 
 const User = mongoose.model('User', userSchema);

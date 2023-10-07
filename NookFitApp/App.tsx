@@ -20,7 +20,6 @@ import FoodDiary from './src/screens/profile/FoodDiary'; // Importing FoodDiary
 import ToDoList from './src/screens/profile/ToDoList'; // Importing ToDoList
 import WaterIntake from './src/screens/profile/WaterIntake'; // Importing WaterIntake
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ApolloProvider } from '@apollo/client';
 import { View } from 'react-native';
 
 // Create a stack navigator

@@ -32,7 +32,7 @@ export const registerUser = async (userData: any) => {
   }
 };
 
-export const updateUserTDEE = async (userEmail: string, tdeeData: any) => {
+export const updateUserTDEE = async (userEmail: string, tdeeData: any, token: string) => {
   console.log("Updating TDEE for user:", userEmail, "with data:", tdeeData);
   try {
     const encodedEmail = encodeURIComponent(userEmail);
@@ -40,6 +40,7 @@ export const updateUserTDEE = async (userEmail: string, tdeeData: any) => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token  // Include the JWT token in the headers
       },
       body: JSON.stringify(tdeeData),
     });
@@ -60,9 +61,30 @@ export const loginUser = async (userData: any) => {
       },
       body: JSON.stringify(userData),
     });
-    return handleResponse(response);
+    const responseData = await handleResponse(response);
+    return {
+      ...responseData,
+      refreshToken: responseData.refreshToken
+    };
   } catch (error) {
     console.error("Login Error:", error);
+    throw error;
+  }
+};
+
+export const refreshToken = async (refreshToken: string) => {
+  console.log("Requesting new access token using refresh token.");
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/users/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Token Refresh Error:", error);
     throw error;
   }
 };

@@ -1,10 +1,25 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-const initialState = {
+export type UserState = {
+  userId: string | null;
+  email: string | null;
+  profile: any | null; 
+  token: string | null;
+  refreshToken: string | null;
+  maintenanceCalories: number | null;
+  caloricTarget: number | null;
+  presentation: string | null;
+  macronutrients: any | null; 
+  tdeeError: string | null;
+  tdee: number | null;
+};
+
+const initialState: UserState = {
   userId: null,
   email: null,
   profile: null,
   token: null,
+  refreshToken: null,
   maintenanceCalories: null,
   caloricTarget: null,
   presentation: null,
@@ -28,6 +43,9 @@ const userSlice = createSlice({
     },
     setToken: (state, action) => {
       state.token = action.payload;
+    },
+    setRefreshToken: (state, action) => { 
+      state.refreshToken = action.payload;
     },
     setMaintenanceCalories: (state, action) => {
       state.maintenanceCalories = action.payload;
@@ -55,6 +73,7 @@ export const {
   setEmail,
   setUserProfile, 
   setToken, 
+  setRefreshToken,
   setMaintenanceCalories,
   setCaloricTarget,
   setPresentation,

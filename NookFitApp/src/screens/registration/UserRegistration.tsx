@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useDispatch } from 'react-redux';
-import { setUserProfile, setEmail } from '../../reducers/userReducer';
+import { setUserProfile, setEmail, setToken, setRefreshToken } from '../../reducers/userReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { registerUser } from '../../api/userAPI';
 import { BACKEND_URL } from '@env';
@@ -78,6 +78,8 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
         if (signInResponse.token) {
             dispatch(setUserProfile(formData));
             dispatch(setEmail(signInResponse.email));
+            dispatch(setToken(signInResponse.token));
+            dispatch(setRefreshToken(signInResponse.refreshToken));
 
             navigation.navigate('HomePage', { 
               userId: signInResponse.userId,
@@ -96,14 +98,12 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    // Check if the presentation field is not empty
     if (formData.presentation === '') {
       Alert.alert('Error', 'Please select a presentation.');
       return;
     }
   
     try {
-      // Log formData to debug the values being sent
       console.log('Submitting Form Data:', formData);
   
       const response = await registerUser(formData);
@@ -116,6 +116,8 @@ const UserRegistration: React.FC<Props> = ({ navigation }) => {
         dispatch(setUserProfile(formData));
         if (response.id) {
           dispatch(setEmail(response.email));
+          dispatch(setToken(response.token));
+          dispatch(setRefreshToken(response.refreshToken));
         }
         navigation.navigate('HomePage', { userId: response.id });
       }

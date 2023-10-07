@@ -4,6 +4,8 @@ import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import * as userAPI from '../../api/userAPI'; 
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -35,6 +37,8 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
 
   const userEmail = route.params?.userEmail;
   const presentation = route.params?.presentation;
+  const token = useSelector((state: RootState) => state.user.token);
+  
 
   if (!presentation) {
     console.error("Presentation is not available.");
@@ -91,17 +95,31 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
       return;
     }
   
+    if (!token) {
+      console.error("Token is not available.");
+      return;
+    }
+  
     try {
-      // Send the TDEE data to the backend
       await userAPI.updateUserTDEE(userEmail, {
         tdee,
         age: formData.age,
         height: (parseInt(formData.heightFeet) * 12) + parseInt(formData.heightInches),
         weight: formData.weight
-      });
+      }, token);
     } catch (error) {
-      console.error("Failed to update TDEE in backend:", error);
-      // Handle the error, maybe show a message to the user
+      if (error instanceof Error) { // This is a type guard
+        if (error.message === "Invalid Token") {
+          // Here, you'd typically use the refresh token to get a new access token
+          // For simplicity, I'm redirecting to the login page
+          navigation.navigate('UserRegistration');
+          console.error("Token has expired. Redirecting to login.");
+        } else {
+          console.error("Failed to update TDEE in backend:", error.message);
+        }
+      } else {
+        console.error("An unexpected error occurred:", error);
+      }
     }
   
     navigation.navigate('FitnessGoalSelection');

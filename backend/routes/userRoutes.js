@@ -28,12 +28,16 @@ const getUsersCollection = (req) => {
 
 // Middleware for JWT authentication
 const authenticateJWT = (req, res, next) => {
-    const token = req.headers.authorization;
-    if (token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        console.log("Extracted Token:", token);  // Debug log
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
             if (err) {
+                console.error("Token Verification Error:", err);  // Debug log
                 return res.status(403).json({ message: 'Invalid token' });
             }
+            console.log("Decoded User:", user);  // Debug log
             req.user = user;
             next();
         });
@@ -41,6 +45,7 @@ const authenticateJWT = (req, res, next) => {
         res.status(401).json({ message: 'Token missing' });
     }
 };
+
 
 // User Registration with input validation
 router.post('/register', [
@@ -97,17 +102,65 @@ router.post('/login', async (req, res, next) => {
         }
 
         const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const refreshToken = jwt.sign({ email: user.email }, process.env.REFRESH_TOKEN_SECRET);
+        await usersCollection.updateOne({ email: user.email }, { $set: { refreshToken: refreshToken } });
+
         res.status(200).json({ 
             token, 
+            refreshToken,
             email: user.email,
-            userId: user._id,  // Assuming the user's ID is stored in _id field in MongoDB
-            presentation: user.presentation  // Send the user's presentation
+            userId: user._id, 
+            presentation: user.presentation  
         });
     } catch (error) {
         console.error('Login Error:', error.message);
         console.error('Stack Trace:', error.stack);
         next(error);
     }
+});
+
+// Revoke Refresh Token
+router.post('/revoke-token', authenticateJWT, async (req, res, next) => {
+    try {
+        const usersCollection = getUsersCollection(req);
+        const { email } = req.user; // Extracting email from the authenticated user
+
+        // Update the user's document to remove the refresh token
+        const result = await usersCollection.updateOne({ email }, { $unset: { refreshToken: "" } });
+
+        if (result.modifiedCount === 0) {
+            return res.status(400).json({ message: 'Failed to revoke refresh token.' });
+        }
+
+        res.status(200).json({ message: 'Refresh token revoked successfully!' });
+    } catch (error) {
+        console.error('Revoke Token Error:', error.message);
+        console.error('Stack Trace:', error.stack);
+        next(error);
+    }
+});
+
+// Route to handle token refresh requests
+router.post('/token', async (req, res) => {
+    const refreshToken = req.body.token;
+    if (!refreshToken) {
+        return res.status(403).json({ message: 'Refresh token is required' });
+    }
+
+    const usersCollection = getUsersCollection(req);
+    const user = await usersCollection.findOne({ refreshToken: refreshToken });
+    if (!user) {
+        return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, userData) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        }
+
+        const accessToken = jwt.sign({ email: userData.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ accessToken });
+    });
 });
 
 // Fetch User Profile with authentication middleware
