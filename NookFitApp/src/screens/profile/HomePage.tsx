@@ -10,23 +10,31 @@ import { selectToken } from '../../selectors/userSelector';
 type RootStackParamList = {
   UserRegistration: undefined;
   HomePage: { userId?: string; userEmail?: string; presentation?: string };
-  TDEEScreen: { userId: string; userEmail: string | null; presentation: string | null; token: string | null };
-  DietaryPreferencesAllergies: { userId: string; userEmail: string; token: string | null };
-  WorkoutSettings: { userId: string; userEmail: string; token: string | null };
-  FitnessGoalSelection: { userId: string; token: string | null };
+  TDEEScreen: { userId: string; userEmail: string; presentation: string; token: string | null };
+  DietaryPreferencesAllergies: { userId: string; userEmail: string; presentation: string; token: string | null };
+  WorkoutSettings: { userId: string; userEmail: string; presentation: string; token: string | null };
+  FitnessGoalSelection: { userId: string; userEmail: string; presentation: string; token: string | null };
 };
 
 type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'HomePage'>;
+
+type UserData = {
+  maintenanceCalories: number | null;
+  caloricTarget: number | null;
+  macronutrients: any | null;
+  tdee: number | null;
+};
 
 const HomePage: React.FC = () => {
   const navigation = useNavigation<HomeNavigationProp>();
   const route = useRoute<RouteProp<RootStackParamList, 'HomePage'>>();
   const token = useSelector(selectToken);
 
-  const [userData, setUserData] = useState({
+  const [userData, setUserData] = useState<UserData>({
     maintenanceCalories: null,
     caloricTarget: null,
-    macronutrients: null
+    macronutrients: null,
+    tdee: null
   });
 
   const userId = route.params?.userId;
@@ -60,10 +68,9 @@ const HomePage: React.FC = () => {
       <Text style={styles.title}>Nook Fitness Dashboard</Text>
 
       <View style={styles.card}>
-        {userData.maintenanceCalories && <Text>Maintenance Calories: {userData.maintenanceCalories} kcal</Text>}
-        {userData.caloricTarget && <Text>Caloric Adjustment: {userData.caloricTarget} kcal</Text>}
-        {userData.maintenanceCalories && userData.caloricTarget && (
-          <Text>Total Available Calories for the Day: {userData.maintenanceCalories + userData.caloricTarget} kcal</Text>
+        {userData.tdee && <Text>Maintenance Calories: {Math.ceil(userData.tdee)} kcal</Text>}
+        {userData.tdee && userData.caloricTarget && (
+          <Text>Total Available Calories for the Day: {Math.ceil(userData.tdee + userData.caloricTarget)} kcal</Text>
         )}
         {userData.macronutrients && <Text>Macronutrients: {JSON.stringify(userData.macronutrients)}</Text>}
       </View>
@@ -87,18 +94,18 @@ const HomePage: React.FC = () => {
       />
       <Button 
         title="Update Fitness Goals" 
-        onPress={() => userId && navigation.navigate('FitnessGoalSelection', { userId, token })} 
-        disabled={!userId}
+        onPress={() => userId && userEmail && presentation && navigation.navigate('FitnessGoalSelection', { userId, userEmail, presentation, token })} 
+        disabled={!userId || !userEmail || !presentation}
       />
       <Button 
         title="Update Dietary Preferences" 
-        onPress={() => userId && userEmail && navigation.navigate('DietaryPreferencesAllergies', { userId, userEmail, token })} 
-        disabled={!userId || !userEmail}
+        onPress={() => userId && userEmail && presentation && navigation.navigate('DietaryPreferencesAllergies', { userId, userEmail, presentation, token })} 
+        disabled={!userId || !userEmail || !presentation}
       />
       <Button 
         title="Update Workout Settings" 
-        onPress={() => userId && userEmail && navigation.navigate('WorkoutSettings', { userId, userEmail, token })} 
-        disabled={!userId || !userEmail}
+        onPress={() => userId && userEmail && presentation && navigation.navigate('WorkoutSettings', { userId, userEmail, presentation, token })} 
+        disabled={!userId || !userEmail || !presentation}
       />
     </View>
   );

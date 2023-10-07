@@ -3,19 +3,31 @@ import { View, Text, StyleSheet, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { setCaloricTarget } from '../../reducers/userReducer';
 
 type RootStackParamList = {
   UserRegistration: undefined;
   TDEEScreen: undefined;
-  FitnessGoalSelection: undefined;
+  FitnessGoalSelection: { 
+    userId: string; 
+    tdee: number; 
+    token: string | null; 
+    userEmail: string; 
+    presentation: string; 
+  };
   WorkoutSettings: undefined;
-  HomePage: undefined;
-  DietaryPreferencesAllergies: undefined;
+  HomePage: {
+    userId?: string;
+    userEmail?: string;
+    presentation?: string;
+    caloricTarget?: number
+  };
+    DietaryPreferencesAllergies: undefined;
 };
 
-type FitnessGoalNavigationProp = StackNavigationProp<RootStackParamList, 'DietaryPreferencesAllergies'>;
+type FitnessGoalNavigationProp = StackNavigationProp<RootStackParamList, 'FitnessGoalSelection'>;
 
 const goals = [
   '--Select your goal--',
@@ -29,6 +41,9 @@ const goals = [
 
 const FitnessGoalSelection = ({ navigation }: { navigation: FitnessGoalNavigationProp }) => {
   const dispatch = useDispatch();
+  const route = useRoute<RouteProp<RootStackParamList, 'FitnessGoalSelection'>>();
+  const { tdee, userId, userEmail, presentation } = route.params;
+
   const [selectedGoal, setSelectedGoal] = useState<string | undefined>(undefined);
   const [caloricAdjustment, setCaloricAdjustment] = useState<number>(0); // Default value
   const [sliderKey, setSliderKey] = useState<number>(0); // Key for Slider
@@ -50,16 +65,16 @@ const FitnessGoalSelection = ({ navigation }: { navigation: FitnessGoalNavigatio
         adjustment = 500; // Increase calories for strength training
         break;
       case 'Flexibility & Mobility':
-        adjustment = 0; // Maintenance
-        break;
       case 'General Fitness':
         adjustment = 0; // Maintenance
         break;
     }
     setCaloricAdjustment(adjustment);
-    dispatch(setCaloricTarget(adjustment));
+    dispatch(setCaloricTarget(tdee + adjustment)); // Apply adjustment to tdee
     setSliderKey(prevKey => prevKey + 1);  // Increment the slider key
   };
+
+  console.log(`Received userId: ${userId}, userEmail: ${userEmail}, presentation: ${presentation}, tdee: ${tdee}`);
 
   return (
     <View style={styles.container}>
@@ -87,9 +102,30 @@ const FitnessGoalSelection = ({ navigation }: { navigation: FitnessGoalNavigatio
 
       <Button 
         title="NEXT" 
-        onPress={() => navigation.navigate('DietaryPreferencesAllergies')} 
+        onPress={() => {
+          navigation.navigate('DietaryPreferencesAllergies');
+          navigation.navigate('HomePage', { 
+            userId: userId, 
+            userEmail: userEmail, 
+            presentation: presentation, 
+            caloricTarget: tdee + caloricAdjustment 
+          });
+          console.log(`Sent to HomePage: userId: ${userId}, userEmail: ${userEmail}, presentation: ${presentation}, caloricTarget: ${tdee + caloricAdjustment}`);
+        }} 
       />
-      <Button title="Go to Home" onPress={() => navigation.navigate('HomePage')} />
+      <Button 
+        title="Go to Home" 
+        onPress={() => {
+          dispatch(setCaloricTarget(caloricAdjustment));
+          navigation.navigate('HomePage', { 
+            userId: userId, 
+            userEmail: userEmail, 
+            presentation: presentation, 
+            caloricTarget: caloricAdjustment 
+          });
+          console.log(`Sent to HomePage: userId: ${userId}, userEmail: ${userEmail}, presentation: ${presentation}, caloricTarget: ${caloricAdjustment}`);
+        }} 
+      />
     </View>
   );
 };

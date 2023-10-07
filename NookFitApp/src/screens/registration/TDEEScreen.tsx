@@ -10,7 +10,13 @@ import { RootState } from '../../store';
 type RootStackParamList = {
   UserRegistration: undefined;
   TDEEScreen: { userEmail: string | null; presentation: string | null };
-  FitnessGoalSelection: undefined;
+  FitnessGoalSelection: { 
+    tdee: number; 
+    userId: string; 
+    userEmail: string; 
+    presentation: string; 
+    token: string; 
+  };
   HomePage: undefined; 
 };
 
@@ -48,17 +54,20 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
   
   const calculateTDEE = (presentation: 'masculine' | 'feminine' | 'non-binary') => {
     let BMR = 0;
+    const weightInKg = parseInt(formData.weight) * 0.453592; // Convert lbs to kg
+    const heightInCm = ((parseInt(formData.heightFeet) * 12) + parseInt(formData.heightInches)) * 2.54; // Convert feet and inches to cm
+
     switch (presentation) {
       case 'masculine':
-        BMR = 66.5 + ( 13.75 * parseInt(formData.weight) ) + ( 5.003 * (parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)) ) - ( 6.75 * parseInt(formData.age) );
+        BMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * parseInt(formData.age)) + 5;
         break;
       case 'feminine':
-        BMR = 655.1 + ( 9.563 * parseInt(formData.weight) ) + ( 1.850 * (parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)) ) - ( 4.676 * parseInt(formData.age) );
+        BMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * parseInt(formData.age)) - 161;
         break;
       case 'non-binary':
         // Average of masculine and feminine
-        const masculineBMR = 66.5 + ( 13.75 * parseInt(formData.weight) ) + ( 5.003 * (parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)) ) - ( 6.75 * parseInt(formData.age) );
-        const feminineBMR = 655.1 + ( 9.563 * parseInt(formData.weight) ) + ( 1.850 * (parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)) ) - ( 4.676 * parseInt(formData.age) );
+        const masculineBMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * parseInt(formData.age)) + 5;
+        const feminineBMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * parseInt(formData.age)) - 161;
         BMR = (masculineBMR + feminineBMR) / 2;
         break;
     }
@@ -122,7 +131,13 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
       }
     }
   
-    navigation.navigate('FitnessGoalSelection');
+    navigation.navigate('FitnessGoalSelection', {
+      tdee: tdee,
+      userId: userEmail,
+      userEmail: userEmail,
+      presentation: presentation,
+      token: token 
+    });
   };
 
   return (
