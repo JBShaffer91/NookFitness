@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { setCaloricTarget } from '../../reducers/userReducer';
+import { updateUserFitnessGoals } from '../../api/userAPI';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -14,6 +15,7 @@ type RootStackParamList = {
     userId: string; 
     tdee: number; 
     token: string | null; 
+    refreshToken: string | null;
     userEmail: string; 
     presentation: string; 
   };
@@ -24,7 +26,13 @@ type RootStackParamList = {
     presentation?: string;
     caloricTarget?: number
   };
-    DietaryPreferencesAllergies: undefined;
+  DietaryPreferencesAllergies: {
+    userId: string;
+    userEmail: string;
+    presentation: string;
+    tdee: number;
+    token: string | null;
+  };
 };
 
 type FitnessGoalNavigationProp = StackNavigationProp<RootStackParamList, 'FitnessGoalSelection'>;
@@ -42,39 +50,59 @@ const goals = [
 const FitnessGoalSelection = ({ navigation }: { navigation: FitnessGoalNavigationProp }) => {
   const dispatch = useDispatch();
   const route = useRoute<RouteProp<RootStackParamList, 'FitnessGoalSelection'>>();
-  const { tdee, userId, userEmail, presentation } = route.params;
+  const { tdee, userId, userEmail, presentation, refreshToken } = route.params;
 
   const [selectedGoal, setSelectedGoal] = useState<string | undefined>(undefined);
-  const [caloricAdjustment, setCaloricAdjustment] = useState<number>(0); // Default value
-  const [sliderKey, setSliderKey] = useState<number>(0); // Key for Slider
+  const [caloricAdjustment, setCaloricAdjustment] = useState<number>(0);
+  const [sliderKey, setSliderKey] = useState<number>(0);
 
-  const handleGoalChange = (goal: string) => {
+  const handleGoalChange = async (goal: string) => {
     setSelectedGoal(goal);
     let adjustment = 0;
     switch (goal) {
       case 'Weight Loss':
-        adjustment = -250; // Safe deficit for weight loss
+        adjustment = -250;
         break;
       case 'Muscle Gain':
-        adjustment = 500; // Default surplus for muscle gain
+        adjustment = 500;
         break;
       case 'Improve Cardio':
-        adjustment = 300; // Extra calories for cardio
+        adjustment = 300;
         break;
       case 'Increase Strength':
-        adjustment = 500; // Increase calories for strength training
+        adjustment = 500;
         break;
       case 'Flexibility & Mobility':
       case 'General Fitness':
-        adjustment = 0; // Maintenance
+        adjustment = 0;
+        break;
+      default:
+        adjustment = 0;
         break;
     }
     setCaloricAdjustment(adjustment);
-    dispatch(setCaloricTarget(tdee + adjustment)); // Apply adjustment to tdee
-    setSliderKey(prevKey => prevKey + 1);  // Increment the slider key
-  };
+    dispatch(setCaloricTarget(tdee + adjustment));
+    setSliderKey(prevKey => prevKey + 1);
 
-  console.log(`Received userId: ${userId}, userEmail: ${userEmail}, presentation: ${presentation}, tdee: ${tdee}`);
+    if (userEmail && route.params.token) {
+      try {
+        const fitnessGoalsData = {
+          fitnessGoals: {
+          goal: goal,
+          caloricAdjustment: adjustment
+        },
+        caloricTarget: tdee + adjustment,
+        refreshToken: refreshToken
+      };
+      await updateUserFitnessGoals(userEmail, fitnessGoalsData, route.params.token);
+      } catch (error) {
+        console.error('Failed to update fitness goals:', error);
+      }
+    } else {
+      console.error('User email or token is missing.');
+    }
+      console.log('Attempting to update fitness goals for user:', userEmail);
+  };
 
   return (
     <View style={styles.container}>
@@ -103,27 +131,29 @@ const FitnessGoalSelection = ({ navigation }: { navigation: FitnessGoalNavigatio
       <Button 
         title="NEXT" 
         onPress={() => {
-          navigation.navigate('DietaryPreferencesAllergies');
+          navigation.navigate('DietaryPreferencesAllergies', {
+            userId: userId,
+            userEmail: userEmail,
+            presentation: presentation,
+            tdee: tdee + caloricAdjustment,
+            token: route.params.token
+          });
+        }} 
+      />
+      <Button 
+        title="Go to Home" 
+        onPress={() => {
+          if (!selectedGoal || selectedGoal === '--Select your goal--') {
+            Alert.alert('Error', 'Please select a fitness goal.');
+            return;
+          }
+          dispatch(setCaloricTarget(tdee + caloricAdjustment));
           navigation.navigate('HomePage', { 
             userId: userId, 
             userEmail: userEmail, 
             presentation: presentation, 
             caloricTarget: tdee + caloricAdjustment 
           });
-          console.log(`Sent to HomePage: userId: ${userId}, userEmail: ${userEmail}, presentation: ${presentation}, caloricTarget: ${tdee + caloricAdjustment}`);
-        }} 
-      />
-      <Button 
-        title="Go to Home" 
-        onPress={() => {
-          dispatch(setCaloricTarget(caloricAdjustment));
-          navigation.navigate('HomePage', { 
-            userId: userId, 
-            userEmail: userEmail, 
-            presentation: presentation, 
-            caloricTarget: caloricAdjustment 
-          });
-          console.log(`Sent to HomePage: userId: ${userId}, userEmail: ${userEmail}, presentation: ${presentation}, caloricTarget: ${caloricAdjustment}`);
         }} 
       />
     </View>

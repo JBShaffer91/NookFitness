@@ -51,6 +51,25 @@ export const updateUserTDEE = async (userEmail: string, tdeeData: any, token: st
   }
 };
 
+export const updateUserFitnessGoals = async (userEmail: string, fitnessData: any, token: string) => {
+  console.log("Updating fitness goals for user:", userEmail, "with data:", fitnessData);
+  try {
+    const encodedEmail = encodeURIComponent(userEmail);
+    const response = await fetch(`${BACKEND_URL}/api/users/fitness-goals/${encodedEmail}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token  
+      },
+      body: JSON.stringify(fitnessData),
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Fitness Goals Update Error:", error);
+    throw error;
+  }
+};
+
 export const loginUser = async (userData: any) => {
   console.log("Logging in user with data:", userData);
   try {

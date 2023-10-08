@@ -8,7 +8,16 @@ const userSchema = new mongoose.Schema({
   height: Number,
   weight: Number,
   tdee: Number,
-  fitnessGoal: String,
+  caloricTarget: Number,
+  macronutrients: {
+    proteins: Number,
+    fats: Number,
+    carbohydrates: Number
+  },
+  fitnessGoals: {
+    goal: String,
+    caloricAdjustment: Number
+  },
   workoutPreferences: {
     frequency: String,
     duration: String,

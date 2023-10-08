@@ -16,6 +16,7 @@ type RootStackParamList = {
     userEmail: string; 
     presentation: string; 
     token: string; 
+    refreshToken: string | null
   };
   HomePage: undefined; 
 };
@@ -45,7 +46,7 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
   const userEmail = route.params?.userEmail;
   const presentation = route.params?.presentation;
   const token = useSelector((state: RootState) => state.user.token);
-  
+  const refreshToken = useSelector((state: RootState) => state.user.refreshToken);
 
   if (!presentation) {
     console.error("Presentation is not available.");
@@ -136,7 +137,8 @@ const TDEEScreen: React.FC<Partial<TDEEScreenProps>> = ({ navigation, route }) =
       userId: userEmail,
       userEmail: userEmail,
       presentation: presentation,
-      token: token 
+      token: token,
+      refreshToken: refreshToken 
     });
   };
 

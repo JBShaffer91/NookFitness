@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Button } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type RootStackParamList = {
   UserRegistration: undefined;
+  HomePage: { userId: string; userEmail: string; presentation: string };
   TDEEScreen: undefined;
   FitnessGoalSelection: undefined;
   WorkoutSettings: undefined;
@@ -22,18 +23,40 @@ const workoutTypes = [
 ];
 
 const WorkoutSettings = ({ navigation }: { navigation: WorkoutSettingsNavigationProp }) => {
+  const [userId, setUserId] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [presentation, setPresentation] = useState<string>('');
+
   const [frequency, setFrequency] = useState<string>('');
   const [duration, setDuration] = useState<string>('');
-  const [preferences, setPreferences] = useState<Record<string, string>>({});
+
+  const defaultPreferences = workoutTypes.reduce((acc, type) => {
+    acc[type] = 'sometimes'; // default value
+    return acc;
+  }, {} as Record<string, string>);
+
+  const [preferences, setPreferences] = useState<Record<string, string>>(defaultPreferences);
 
   const setPreference = (type: string, value: string) => {
     setPreferences(prev => ({ ...prev, [type]: value }));
   };
 
+  const handleNextPress = () => {
+    if (!frequency || !duration || !Object.values(preferences).every(pref => pref)) {
+      Alert.alert('Incomplete Selection', 'Please make sure you have selected all preferences before proceeding.');
+      return;
+    }
+    navigation.navigate('HomePage', {
+      userId: userId, 
+      userEmail: userEmail, 
+      presentation: presentation
+    });
+  };
+
   return (
     <ScrollView 
-    style={styles.container}
-    contentContainerStyle={{ justifyContent: 'center', paddingBottom: 50 }}
+      style={styles.container}
+      contentContainerStyle={{ justifyContent: 'center', paddingBottom: 50 }}
     >
       <Text style={styles.title}>Workout Frequency & Duration</Text>
 
@@ -76,7 +99,7 @@ const WorkoutSettings = ({ navigation }: { navigation: WorkoutSettingsNavigation
 
       <Button 
         title="NEXT" 
-        onPress={() => navigation.navigate('DietaryPreferencesAllergies')} 
+        onPress={handleNextPress}
       />
     </ScrollView>
   );
@@ -98,7 +121,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   pickerContainer: {
-    marginBottom: 20,
+    marginBottom: 30,
   },
 });
 

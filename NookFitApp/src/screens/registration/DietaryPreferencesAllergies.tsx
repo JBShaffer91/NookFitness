@@ -3,15 +3,25 @@ import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useDispatch, useSelector } from 'react-redux';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { setMacronutrients } from '../../reducers/userReducer';
 
 type RootStackParamList = {
   UserRegistration: undefined;
-  HomePage: undefined;
+  HomePage: { 
+    userId?: string; 
+    userEmail?: string; 
+    presentation?: string; 
+  };
   TDEEScreen: undefined;
   FitnessGoalSelection: undefined;
   WorkoutSettings: undefined;
-  DietaryPreferencesAllergies: undefined;
+  DietaryPreferencesAllergies: { 
+    userId: string; 
+    userEmail: string; 
+    presentation: string; 
+    token: string | null; 
+  };
   HealthConcernsInjuries: undefined;
 };
 
@@ -36,7 +46,10 @@ const dietaryPreferences = [
 
 const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPreferencesAllergiesNavigationProp }) => {
   const dispatch = useDispatch();
+  const route = useRoute<RouteProp<RootStackParamList, 'DietaryPreferencesAllergies'>>();
   const caloricTarget = useSelector((state: ReduxState) => state.user.caloricTarget);
+  const { userId, userEmail, presentation } = route.params;
+
   const [selectedDiet, setSelectedDiet] = useState<string>('');
   const [allergies, setAllergies] = useState<string>('');
 
@@ -103,7 +116,19 @@ const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPrefer
         title="NEXT" 
         onPress={handleNext} 
       />
-      <Button title="Go to Home" onPress={() => navigation.navigate('HomePage')} />
+      <Button 
+    title="Go to Home" 
+    onPress={() => {
+        if (selectedDiet) {
+            handleDietChange(selectedDiet);
+        }
+        navigation.navigate('HomePage', {
+            userId: userId, 
+            userEmail: userEmail, 
+            presentation: presentation
+        });
+    }} 
+/>
     </View>
   );
 };

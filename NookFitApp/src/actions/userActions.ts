@@ -11,7 +11,7 @@ import {
   setTDEE,
   setUserId,
 } from '../reducers/userReducer';
-import { loginUser, updateUserTDEE, refreshToken } from '../api/userAPI';
+import { loginUser, updateUserTDEE, refreshToken, updateUserFitnessGoals as apiUpdateUserFitnessGoals } from '../api/userAPI';
 
 const handleResponse = async (response: Response) => {
   const contentType = response.headers.get("content-type");
@@ -117,6 +117,25 @@ export const updateTDEE = (userEmail: string, tdeeData: any, token: string) => a
     } else {
       dispatch(setTDEEError('An unknown error occurred'));
     }
+  }
+};
+
+export const updateUserFitnessGoals = (userEmail: string, fitnessData: any, token: string) => async (dispatch: AppDispatch) => {
+  try {
+    const response = await apiUpdateUserFitnessGoals(userEmail, fitnessData, token);
+    if (!response.ok) throw new Error('Failed to update fitness goals and caloric target');
+    const data = await response.json();
+    dispatch(setCaloricTarget(data.caloricTarget));
+  } catch (error) {
+    console.error('Failed to update fitness goals and caloric target:', error);
+  }
+};
+
+export const updateCaloricTarget = (caloricValue: number) => (dispatch: AppDispatch) => {
+  try {
+    dispatch(setCaloricTarget(caloricValue));
+  } catch (error) {
+    console.error('Failed to update caloric target:', error);
   }
 };
 

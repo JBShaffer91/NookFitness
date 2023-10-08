@@ -226,6 +226,68 @@ router.delete('/profile/:email', authenticateJWT, async (req, res, next) => {
     }
 });
 
+// Update User Fitness Goals and Caloric Target
+router.put('/fitness-goals/:email', authenticateJWT, async (req, res, next) => {
+    try {
+        const usersCollection = getUsersCollection(req);
+        const userEmail = decodeURIComponent(req.params.email);
+        const { fitnessGoals, caloricTarget } = req.body;
+
+        // Log the incoming data
+        console.log('Incoming Data:', { fitnessGoals, caloricTarget });
+
+        // Check if fitnessGoals and caloricTarget are present in the request body
+        if (!fitnessGoals || caloricTarget === undefined) {
+            return res.status(400).json({ message: 'Missing required fields: fitnessGoals or caloricTarget.' });
+        }
+
+        const result = await usersCollection.updateOne(
+            { email: userEmail },
+            { 
+                $set: { 
+                    "fitnessGoals.goal": fitnessGoals.goal,
+                    "fitnessGoals.caloricAdjustment": fitnessGoals.caloricAdjustment,
+                    caloricTarget: caloricTarget 
+                } 
+            }
+        );
+
+        // Log the result of the update operation
+        console.log('Update Result:', result);
+
+        if (result.modifiedCount === 0) {
+            return res.status(400).json({ message: 'Failed to update fitness goals and caloric target. No documents were modified.' });
+        }
+
+        res.status(200).json({ message: 'Fitness goals and caloric target updated successfully!' });
+    } catch (error) {
+        console.error('Update Fitness Goals and Caloric Target Error:', error.message);
+        console.error('Stack Trace:', error.stack);
+        next(error);
+    }
+});
+
+// Update User Dietary Preferences and Allergies
+router.put('/dietary-preferences/:email', authenticateJWT, async (req, res, next) => {
+    try {
+        const usersCollection = getUsersCollection(req);
+        const userEmail = decodeURIComponent(req.params.email);
+        const { dietaryPreferences } = req.body;
+
+        const result = await usersCollection.updateOne({ email: userEmail }, { $set: { dietaryPreferences } });
+
+        if (result.modifiedCount === 0) {
+            return res.status(400).json({ message: 'Failed to update dietary preferences.' });
+        }
+
+        res.status(200).json({ message: 'Dietary preferences updated successfully!' });
+    } catch (error) {
+        console.error('Update Dietary Preferences Error:', error.message);
+        console.error('Stack Trace:', error.stack);
+        next(error);
+    }
+});
+
 // Error handling middleware
 router.use((err, req, res, next) => {
     console.error('Unhandled Error:', err.message);

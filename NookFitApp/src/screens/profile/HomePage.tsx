@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { BACKEND_URL } from '@env';
 import { useSelector } from 'react-redux';
-import { selectToken } from '../../selectors/userSelector';
+import { RootState } from '../../store';
 
 type RootStackParamList = {
   UserRegistration: undefined;
@@ -28,7 +28,9 @@ type UserData = {
 const HomePage: React.FC = () => {
   const navigation = useNavigation<HomeNavigationProp>();
   const route = useRoute<RouteProp<RootStackParamList, 'HomePage'>>();
-  const token = useSelector(selectToken);
+  
+  const token = useSelector((state: RootState) => state.user.token); // <-- Updated line
+  const caloricTargetFromStore = useSelector((state: RootState) => state.user.caloricTarget); // <-- Updated line
 
   const [userData, setUserData] = useState<UserData>({
     maintenanceCalories: null,
@@ -41,7 +43,7 @@ const HomePage: React.FC = () => {
   const userEmail = route.params?.userEmail;
   const presentation = route.params?.presentation;
 
-  useEffect(() => {
+  const fetchUserData = () => {
     if (userEmail && token) {
       fetch(`${BACKEND_URL}/api/users/profile/${encodeURIComponent(userEmail)}`, {
         headers: {
@@ -57,20 +59,33 @@ const HomePage: React.FC = () => {
           setUserData(data);
         }
       })      
-        .catch(error => {
-          console.error("Error fetching user data:", error);
-        });
+      .catch(error => {
+        console.error("Error fetching user data:", error);
+      });
     }
+  };
+
+  useEffect(() => {
+    fetchUserData();
   }, [userEmail, token]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUserData();
+    }, [userEmail, token])
+  );
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Nook Fitness Dashboard</Text>
 
       <View style={styles.card}>
-        {userData.tdee && <Text>Maintenance Calories: {Math.ceil(userData.tdee)} kcal</Text>}
-        {userData.tdee && userData.caloricTarget && (
-          <Text>Total Available Calories for the Day: {Math.ceil(userData.tdee + userData.caloricTarget)} kcal</Text>
+        {userData.tdee && (!caloricTargetFromStore || caloricTargetFromStore === 0) && <Text>Maintenance Calories: {Math.ceil(userData.tdee)} kcal</Text>}
+        {userData.tdee && caloricTargetFromStore && caloricTargetFromStore !== 0 && (
+        <>
+          <Text>Calorie Target: {Math.ceil(userData.tdee + caloricTargetFromStore)} kcal</Text>
+          <Text>Total Available Calories for the Day: {Math.ceil(userData.tdee + caloricTargetFromStore)} kcal</Text>
+        </>
         )}
         {userData.macronutrients && <Text>Macronutrients: {JSON.stringify(userData.macronutrients)}</Text>}
       </View>

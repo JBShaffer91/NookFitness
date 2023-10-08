@@ -4,6 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 
 type RootStackParamList = {
   UserRegistration: undefined;
+  HomePage: { userId: string; userEmail: string; presentation: string };  // Added this line
   TDEEScreen: undefined;
   FitnessGoalSelection: undefined;
   WorkoutSettings: undefined;
@@ -17,11 +18,20 @@ const HealthConcernsInjuries = ({ navigation }: { navigation: HealthConcernsInju
   const [healthConcerns, setHealthConcerns] = useState<string>('');
   const [injuries, setInjuries] = useState<string>('');
 
+  const userId = '';  // Placeholder, replace with actual value or fetch from appropriate source
+  const userEmail = '';  // Placeholder, replace with actual value or fetch from appropriate source
+  const presentation = '';  // Placeholder, replace with actual value or fetch from appropriate source
+
   const handleComplete = () => {
     // Logic to create the user's profile goes here
-    // For now, we'll just show an alert and navigate back to the UserRegistration screen
+    // For now, we'll just show an alert and navigate to the HomePage
     Alert.alert('Profile Created', 'Your profile has been successfully created!', [
-      { text: 'OK', onPress: () => navigation.navigate('UserRegistration') }
+      { text: 'OK', onPress: () => navigation.navigate('HomePage', {
+          userId: userId, 
+          userEmail: userEmail, 
+          presentation: presentation
+        }) 
+      }
     ]);
   };
 
