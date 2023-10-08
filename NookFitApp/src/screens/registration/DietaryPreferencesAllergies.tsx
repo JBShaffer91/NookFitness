@@ -86,14 +86,29 @@ const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPrefer
     dispatch(setMacronutrients(calculatedMacros));
   };
 
+  const handleSubmit = () => {
+    if (selectedDiet) {
+      handleDietChange(selectedDiet);
+    }
+  };
+
   const handleNext = () => {
-    navigation.navigate('HealthConcernsInjuries');
+    handleSubmit();
+    navigation.navigate('WorkoutSettings');
+  };
+
+  const handleGoToHome = () => {
+    handleSubmit();
+    navigation.navigate('HomePage', {
+      userId: userId, 
+      userEmail: userEmail, 
+      presentation: presentation
+    });
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Dietary Preferences & Allergies</Text>
-
       <Text style={styles.subTitle}>Dietary Preference:</Text>
       <Picker
         selectedValue={selectedDiet}
@@ -103,7 +118,6 @@ const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPrefer
           <Picker.Item key={diet} label={diet} value={diet} />
         ))}
       </Picker>
-
       <Text style={styles.subTitle}>Food Allergies (if any):</Text>
       <TextInput 
         placeholder="E.g. Peanuts, Shellfish, Dairy"
@@ -111,24 +125,14 @@ const DietaryPreferencesAllergies = ({ navigation }: { navigation: DietaryPrefer
         onChangeText={setAllergies}
         style={styles.input}
       />
-
       <Button 
         title="NEXT" 
         onPress={handleNext} 
       />
       <Button 
-    title="Go to Home" 
-    onPress={() => {
-        if (selectedDiet) {
-            handleDietChange(selectedDiet);
-        }
-        navigation.navigate('HomePage', {
-            userId: userId, 
-            userEmail: userEmail, 
-            presentation: presentation
-        });
-    }} 
-/>
+        title="Go to Home" 
+        onPress={handleGoToHome} 
+      />
     </View>
   );
 };
