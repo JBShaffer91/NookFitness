@@ -81,10 +81,10 @@ const HomePage: React.FC = () => {
 
       <View style={styles.card}>
         {userData.tdee && (!caloricTargetFromStore || caloricTargetFromStore === 0) && <Text>Maintenance Calories: {Math.ceil(userData.tdee)} kcal</Text>}
-        {userData.tdee && caloricTargetFromStore && caloricTargetFromStore !== 0 && (
+        {caloricTargetFromStore && caloricTargetFromStore !== 0 && (
         <>
-          <Text>Calorie Target: {Math.ceil(userData.tdee + caloricTargetFromStore)} kcal</Text>
-          <Text>Total Available Calories for the Day: {Math.ceil(userData.tdee + caloricTargetFromStore)} kcal</Text>
+          <Text>Calorie Target: {Math.ceil(caloricTargetFromStore)} kcal</Text>
+          <Text>Total Available Calories for the Day: {Math.ceil(caloricTargetFromStore)} kcal</Text>
         </>
         )}
         {userData.macronutrients && <Text>Macronutrients: {JSON.stringify(userData.macronutrients)}</Text>}
